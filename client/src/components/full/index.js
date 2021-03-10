@@ -84,32 +84,31 @@ export class Full extends React.Component {
 
     render() {
 
-        const logged = (
+        const result = this.state.user
+                ? (
+                    <React.Fragment>
+                        <Player />
+                        <div id="workspace">
+                            <Music
+                                searchMode={this.state.searchMode}
+                                resolution={spaceResolutions.music}
+                                playlists={this.state.user.playlists}
+                                songs={[]}
+                            />
+                            <Search
+                                searchMode={this.state.searchMode}
+                                resolution={spaceResolutions.search}
+                            />
+                        </div>
+                        <Footer/>
+                    </React.Fragment>
+                )
+                : <Auth authSuccess={this.authSuccess} authFail={this.authFail}/>
+
+        return (
             <div id="full">
-                <Player/>
-                <div id="workspace">
-                    <Music
-                        searchMode={this.state.searchMode}
-                        resolution={spaceResolutions.music}
-                        playlists={[]}
-                        songs={[]}
-                    />
-                    <Search
-                        searchMode={this.state.searchMode}
-                        resolution={spaceResolutions.search}
-                    />
-                </div>
-                <Footer/>
+                {result}
             </div>
         )
-        // const result = this.state.user
-        //     ? (
-        //
-        //     )
-        //     : <Auth authSuccess={this.authSuccess} authFail={this.authFail}/>
-
-
-
-        return this.state.user ? logged : <Auth authSuccess={this.authSuccess} authFail={this.authFail}/>
     }
 }

@@ -46,6 +46,8 @@
     display: flex;
     flex-direction: column;
     padding: 0 15px;
+    scrollbar-width: thin;
+    scrollbar-color: $main rgba($main, 0.1);
 
     .item {
       margin-bottom: 10px;
