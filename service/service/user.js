@@ -14,7 +14,7 @@ module.exports = app => {
 		async create(username, password) {
 			const newUser = new model({
 				username,
-				password: await bcrypt.hash(password)
+				password: await bcrypt.hash(password, 10)
 			})
 			return newUser.save()
 		},
