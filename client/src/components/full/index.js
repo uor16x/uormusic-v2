@@ -30,6 +30,7 @@ export class Full extends React.Component {
         this.authSuccess = this.authSuccess.bind(this)
         this.authFail = this.authFail.bind(this)
         this.logout = this.logout.bind(this)
+        this.toggleSearch = this.toggleSearch.bind(this)
     }
 
     componentDidMount() {
@@ -96,6 +97,7 @@ export class Full extends React.Component {
                                 songs={[]}
                             />
                             <Search
+                                toggleSearch={this.toggleSearch}
                                 searchMode={this.state.searchMode}
                                 resolution={spaceResolutions.search}
                             />
