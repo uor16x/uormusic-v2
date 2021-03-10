@@ -1,0 +1,13 @@
+@import "./src/variables";
+
+.item {
+  display: flex;
+  flex-direction: row;
+  background-color: $main;
+  padding: 5px 10px;
+  border-radius: $main-border-radius;
+  border: 2px groove $secondary;
+  cursor: pointer;
+  text-align: center;
+  justify-content: center;
+}
