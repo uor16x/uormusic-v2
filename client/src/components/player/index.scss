@@ -1,0 +1,12 @@
+@import "./src/variables";
+
+#player {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  height: 60px;
+  width: 100%;
+  background-color: $main;
+  border-bottom-right-radius: $main-border-radius;
+  border-bottom-left-radius: $main-border-radius;
+}

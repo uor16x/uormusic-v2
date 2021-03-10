@@ -1,11 +1,24 @@
 import * as React from "react";
+import './index.scss'
 
-import {Auth, Loader} from "components";
+import {Auth, Player, Music, Search} from "components";
 import {UserService} from "services";
+import {Footer} from "../footer";
 
 const defaultState = {
     user: null,
-    loading: true
+    searchMode: false
+}
+
+const spaceResolutions = {
+    music: {
+        sm: [ 7, 11 ],
+        xs: [ 'hidden', 11 ]
+    },
+    search: {
+        sm: [ 5, 1 ],
+        xs: [ 12, 'hidden' ]
+    }
 }
 
 export class Full extends React.Component {
@@ -60,21 +73,43 @@ export class Full extends React.Component {
             })
     }
 
-    render() {
-        const result = this.state.loading
-            ? <Loader/>
-            : this.state.user
-                ? (
-                    <React.Fragment>
-                        <h1>Inside</h1>
-                    </React.Fragment>
-                )
-                : <Auth authSuccess={this.authSuccess} authFail={this.authFail}/>
+    /**
+     * Other
+     */
+    toggleSearch() {
+        this.setState({
+            searchMode: !this.state.searchMode
+        })
+    }
 
-        return (
+    render() {
+
+        const logged = (
             <div id="full">
-                {result}
+                <Player/>
+                <div id="workspace">
+                    <Music
+                        searchMode={this.state.searchMode}
+                        resolution={spaceResolutions.music}
+                        playlists={[]}
+                        songs={[]}
+                    />
+                    <Search
+                        searchMode={this.state.searchMode}
+                        resolution={spaceResolutions.search}
+                    />
+                </div>
+                <Footer/>
             </div>
         )
+        // const result = this.state.user
+        //     ? (
+        //
+        //     )
+        //     : <Auth authSuccess={this.authSuccess} authFail={this.authFail}/>
+
+
+
+        return this.state.user ? logged : <Auth authSuccess={this.authSuccess} authFail={this.authFail}/>
     }
 }

@@ -1,0 +1,26 @@
+@import "./src/variables";
+
+#search {
+  display: flex;
+  flex-direction: row;
+  padding-left: 0;
+  padding-right: 0;
+  background-color: rgba($main, 0.35);
+  border-radius: $main-border-radius;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  border-top-left-radius: 0;
+  border-left: 2px groove $secondary;;
+
+  &.expanded {
+    padding-right: inherit;
+  }
+
+  .toggler {
+    display: flex;
+    background-color: $main;
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,34 @@
+@import "./src/variables";
+
+#footer {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 45px;
+  width: 100%;
+  background-color: $main;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-top-right-radius: $main-border-radius;
+  border-top-left-radius: $main-border-radius;
+
+  .footer-wrapper {
+    display: flex;
+  }
+
+  .now-playing, .toolbar {
+    height: 100%;
+    display: flex;
+  }
+
+  .toolbar {
+    justify-content: center;
+
+    &-item {
+      text-align: center;
+      cursor: pointer;
+    }
+  }
+}

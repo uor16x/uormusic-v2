@@ -1,0 +1,76 @@
+@import "./src/variables";
+
+#music {
+  background-color: $main;
+  border-radius: $main-border-radius;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  padding: 0;
+  border-top-right-radius: 0;
+
+  &.collapsed-mobile {
+    display: none;
+  }
+
+  .header {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    background-color: rgba($main, 0.35);
+    margin-bottom: 10px;
+    padding: 10px 25px;
+
+    .search-input {
+      max-height: 24px;
+    }
+
+    .back, .title, .tools {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .tools {
+      .tool-item {
+        margin-left: 10px;
+      }
+    }
+  }
+
+  .list {
+    height: 100%;
+    width: 100%;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    padding: 0 15px;
+
+    .item {
+      margin-bottom: 10px;
+      background-color: rgba(black, 0.1);
+
+      .music-list-item-tools {
+        visibility: hidden;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+
+        div {
+          margin-left: 7px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+        }
+      }
+
+      &.mobile, &:hover {
+        .music-list-item-tools {
+          visibility: visible;
+        }
+      }
+    }
+  }
+}
