@@ -60,6 +60,11 @@ module.exports = env => {
 			)
 		})
 		.then(() => {
+			const clientBundlePath = path.join(__root, './client/build')
+			app.use(express.static(clientBundlePath))
+			app.get('/', (req, res) => {
+				return res.sendFile('index.html', { root: clientBundlePath })
+			})
 			app.middlewares = app.importer('middleware')
 			app.use(bodyParser.json({ limit: '100mb', extended: false }))
 			app.use(app.middlewares.auth)
