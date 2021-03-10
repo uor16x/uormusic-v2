@@ -1,0 +1,23 @@
+{
+  "name": "uormusic-v2",
+  "version": "1.0.0",
+  "description": "Music library with search feature",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uor16x/uormusic-v2.git"
+  },
+  "keywords": [
+    "music",
+    "player"
+  ],
+  "author": "Oleh Yurevych",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/uor16x/uormusic-v2/issues"
+  },
+  "homepage": "https://github.com/uor16x/uormusic-v2#readme"
+}
