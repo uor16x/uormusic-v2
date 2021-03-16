@@ -1,14 +1,11 @@
-import * as React from "react";
+import * as React from "react"
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import './index.scss'
 
-import {Auth, Player, Music, Search} from "components";
-import {UserService} from "services";
-import {Footer} from "../footer";
-
-const defaultState = {
-    user: null,
-    searchMode: false
-}
+import {Auth, Player, Music, Search, CustomModal} from "components"
+import {UserService, ModalService, ToastService} from "services"
+import {Footer} from "../footer"
 
 const spaceResolutions = {
     music: {
@@ -21,6 +18,13 @@ const spaceResolutions = {
     }
 }
 
+const defaultState = {
+    user: null,
+    loading: true,
+    searchMode: false,
+    modal: null
+}
+
 export class Full extends React.Component {
 
     constructor(props) {
@@ -30,10 +34,16 @@ export class Full extends React.Component {
         this.authSuccess = this.authSuccess.bind(this)
         this.authFail = this.authFail.bind(this)
         this.logout = this.logout.bind(this)
+        this.getUser = this.getUser.bind(this)
+        this.addPlaylistCb = this.addPlaylistCb.bind(this)
         this.toggleSearch = this.toggleSearch.bind(this)
     }
 
     componentDidMount() {
+        ToastService.subscribeSuccess(text => toast(text, { type: toast.TYPE.SUCCESS }))
+        ToastService.subscribeInfo(text => toast(text, { type: toast.TYPE.INFO }))
+        ToastService.subscribeErr(text => toast(text, { type: toast.TYPE.ERROR }))
+
         this.getUser()
     }
 
@@ -47,8 +57,18 @@ export class Full extends React.Component {
                     loading: false,
                     user
                 })
-                if (afterLogin && user && user.username) {
-                    alert(`Welcome back, ${user.username}`)
+                if (afterLogin && user) {
+                    ToastService.publishInfo(`Welcome back, ${user.username}`)
+                    ModalService.setCloseCb(() => {
+                        this.setState({
+                            modal: null
+                        })
+                    })
+                    ModalService.subscribe(modal => {
+                        this.setState({
+                            modal
+                        })
+                    })
                 }
             }, error => {
                 this.setState({
@@ -63,15 +83,21 @@ export class Full extends React.Component {
     }
 
     authFail(msg) {
-        alert(msg)
+        ToastService.publishErr(msg)
     }
 
     logout() {
         UserService.clear()
             .then(() => {
-                alert('Bye!')
                 this.setState({ ...defaultState, loading: false })
             })
+    }
+
+    /**
+     * Playlists
+     */
+    addPlaylistCb(data) {
+
     }
 
     /**
@@ -84,7 +110,9 @@ export class Full extends React.Component {
     }
 
     render() {
-
+        if (this.state.loading) {
+            return null
+        }
         const result = this.state.user
                 ? (
                     <React.Fragment>
@@ -95,6 +123,7 @@ export class Full extends React.Component {
                                 resolution={spaceResolutions.music}
                                 playlists={this.state.user.playlists}
                                 songs={[]}
+                                triggerGetUser={this.getUser}
                             />
                             <Search
                                 toggleSearch={this.toggleSearch}
@@ -110,6 +139,11 @@ export class Full extends React.Component {
         return (
             <div id="full">
                 {result}
+                <ToastContainer
+                    hideProgressBar={true}
+                    autoClose={3000}
+                    position={toast.POSITION.BOTTOM_RIGHT}/>
+                {this.state.modal}
             </div>
         )
     }

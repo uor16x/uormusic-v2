@@ -75,7 +75,7 @@ input {
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: rgba(23, 23, 23, 0.45);;
+  background: rgba(23, 23, 23, 0.45);
 }
 
 /* Handle */
@@ -86,4 +86,40 @@ input {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #565656;
+}
+
+
+
+// Modal
+.custom-modal-dialog {
+  width: 48% !important;
+  top: 20%;
+
+  .modal-content {
+    background-color: rgba(#565656, 0.85);
+    border-radius: 10px;
+    border: 1px solid white;
+
+    button {
+      box-shadow: none;
+    }
+
+    .input-group {
+      margin-bottom: 8px;
+      input {
+        border: 2px solid rgba(black, 0.6);
+        box-shadow: none;
+      }
+    }
+
+    .modal-header {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .btn-primary {
+      background-color: rgba(23, 23, 23, 0.45);
+      border-color: white;
+    }
+  }
 }

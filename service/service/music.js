@@ -12,6 +12,9 @@ module.exports = app => {
 				songs: []
 			})
 		},
+		async deletePlaylist(id) {
+			return app.models.Playlist.findOneAndRemove({ _id: id })
+		},
 		async createSongs(songsData) {
 			const songs = songsData
 				.map(data => {

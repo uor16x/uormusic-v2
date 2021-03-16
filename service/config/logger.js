@@ -14,11 +14,15 @@ function handleLog(args, level) {
 			if (_.isFunction(item)) {
 				continue
 			}
+			let stack = item.stack
 			if (_.isObject(item)) {
 				if (item.message) {
 					item = item.message
 				} else {
 					item = JSON.stringify(item)
+				}
+				if (process.env.ENV !== 'prod') {
+					item += ` | ${stack}`
 				}
 
 			}
