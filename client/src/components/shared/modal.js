@@ -6,7 +6,7 @@ export const CustomModal = function ({ header, inputFields = [], submitText, cb 
 
     function submit(data) {
         cb(data)
-        ModalService.closeCb()
+        ModalService.publish(null)
     }
 
     const [data, setData] = useState(inputFields.reduce((acc, inputData) => {
@@ -38,7 +38,7 @@ export const CustomModal = function ({ header, inputFields = [], submitText, cb 
                 </Modal.Body>
                 }
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => ModalService.closeCb()}>Close</Button>
+                    <Button variant="secondary" onClick={() => ModalService.publish(null)}>Close</Button>
                     <Button variant="primary" onClick={() => submit(data) }>{ submitText }</Button>
                 </Modal.Footer>
             </Modal.Dialog>

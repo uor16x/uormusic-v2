@@ -1,10 +1,5 @@
 export const ModalService = {
     callbacks: [],
-    closeCb: () => {},
-
-    setCloseCb(cb) {
-        this.closeCb = cb
-    },
 
     subscribe(fn) {
         this.callbacks.push(fn);
