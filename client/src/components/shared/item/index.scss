@@ -1,5 +1,12 @@
 @import "./src/variables";
 
+.item-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
 .item {
   display: flex;
   flex-direction: row;
@@ -10,4 +17,29 @@
   cursor: pointer;
   text-align: center;
   justify-content: center;
+}
+
+.actions {
+  padding: 10px;
+  border: 1px solid $main;
+  margin: 0;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-top: none;
+  width: 99%;
+  align-self: center;
+  margin-top: -2px;
+  justify-content: space-around;
+
+  .item-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0;
+
+    border-right: 2px solid $main;
+
+    &:last-child {
+      border-right: none;
+    }
+  }
 }

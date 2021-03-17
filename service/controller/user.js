@@ -24,6 +24,7 @@ module.exports = app => {
 			if (!newUser) {
 				return res.result('Error create user')
 			}
+			app.services.storage.createBucket(newUser._id)
 			currUser = newUser
 		} else {
 			// Sign in

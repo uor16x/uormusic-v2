@@ -1,6 +1,6 @@
 import React from 'react'
 import './index.scss'
-import {Col, Row} from 'react-bootstrap'
+import {Col} from 'react-bootstrap'
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {library} from '@fortawesome/fontawesome-svg-core'
@@ -13,6 +13,9 @@ export class Search extends React.Component {
 
 	constructor(props) {
 		super(props)
+		this.state = {
+			query: ''
+		}
 	}
 
 	render() {

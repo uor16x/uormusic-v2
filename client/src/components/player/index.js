@@ -5,6 +5,9 @@ export class Player extends React.Component {
 
 	constructor(props) {
 		super(props)
+		this.state = {
+			playing: false
+		}
 	}
 
 	render() {

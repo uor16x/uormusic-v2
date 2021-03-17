@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React from 'react'
 import './index.scss'
 import { Col } from 'react-bootstrap'
 import {CustomModal, Item} from 'components'
@@ -9,12 +9,17 @@ import 'react-toastify/dist/ReactToastify.css'
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {fab} from '@fortawesome/free-brands-svg-icons'
-import {faSearch, faChevronLeft, faPlus, faTimes, faTrashAlt, faEdit} from '@fortawesome/free-solid-svg-icons'
-library.add(fab, faSearch, faPlus, faChevronLeft, faTimes, faTrashAlt, faEdit)
+import {faSearch, faChevronLeft, faPlus, faTimes, faTrashAlt, faEdit, faUpload} from '@fortawesome/free-solid-svg-icons'
+library.add(fab, faSearch, faPlus, faChevronLeft, faTimes, faTrashAlt, faEdit, faUpload)
+
+const stubFn = () => {}
 
 const defaultState = {
 	searching: false,
-	searchQuery: ''
+	searchQuery: '',
+	currPlaylist: null,
+	currSongs: [],
+	menuActionItem: null
 }
 
 export class Music extends React.Component {
@@ -24,6 +29,8 @@ export class Music extends React.Component {
 		this.state = { ...defaultState }
 
 		this.setSearchQuery = this.setSearchQuery.bind(this)
+		this.deletePlaylistModal = this.deletePlaylistModal.bind(this)
+		this.setPlaylist = this.setPlaylist.bind(this)
 		this.toggleSearching = this.toggleSearching.bind(this)
 		this.itemLongPressed = this.itemLongPressed.bind(this)
 	}
@@ -103,16 +110,45 @@ export class Music extends React.Component {
 		})
 	}
 
-
 	itemLongPressed(element) {
 		alert(element.id)
 	}
 
+	/**
+	 * Modes
+	 */
 
-	render() {
-		const mobileUser = isMobile()
-		const title = this.state.searching
-			? (
+
+	setPlaylist(id) {
+		if (!id) {
+			this.setState({
+				currPlaylist: null,
+				menuActionItem: null
+			})
+		}
+		this.setState({
+			currPlaylist: id,
+			currSongs: [],
+			menuActionItem: null
+		})
+	}
+
+
+	modeHandler(mobileUser) {
+		const result = {
+			backButton: <React.Fragment/>,
+			listItems: [],
+			title: '',
+			toolButton: null
+		}
+
+		let list = [],
+			editAction = stubFn,
+			deleteAction = stubFn,
+			clickAction = stubFn
+
+		if (this.state.searching) {
+			result.title = (
 				<input
 					type="text"
 					autoFocus
@@ -121,46 +157,76 @@ export class Music extends React.Component {
 					placeholder="Type to search..."
 				/>
 			)
-			: (<span>{this.state.songsMode ? 'Some playlist' : 'Playlists'}</span>)
+		} else {
+			const titleText = this.state.currPlaylist
+				? this.props.playlists.find(list => list._id === this.state.currPlaylist).name
+				: 'Home'
+			result.title = (
+				<span className="cut">
+					{titleText}
+				</span>
+			)
+		}
 
-		const list = this.state.songsMode
-			? this.props.songs
-			: this.props.playlists
+		if (this.state.currPlaylist) {
+			list = this.state.currSongs
+			clickAction = (id) => alert(id)
+			result.backButton = (
+				<FontAwesomeIcon
+					className="clickable"
+					onClick={() => this.setPlaylist(null)}
+					icon="chevron-left"/>
+				)
+			result.toolButton = (
+				<FontAwesomeIcon className="tool-item clickable"
+								 onClick={() => {}}
+								 icon="upload"/>
+			)
+		} else {
+			list = this.props.playlists
+			clickAction = (id) => this.setPlaylist(id)
+			deleteAction = this.deletePlaylistModal
+			result.toolButton = (
+				<FontAwesomeIcon className="tool-item clickable"
+								 onClick={() => this.addPlaylistModal()}
+								 icon="plus"/>
+			)
+		}
 
-		const searchButton = this.state.searching
-			? (<FontAwesomeIcon onClick={this.toggleSearching} className="tool-item clickable" icon="times"/>)
-			: (<FontAwesomeIcon onClick={this.toggleSearching} className="tool-item clickable" icon="search"/>)
-
-		const backButton = this.props.songsMode
-			? (<FontAwesomeIcon className="clickable" icon="chevron-left"/>)
-			: null
-
-		const listItems = list.map(item =>
+		result.listItems = list.map(item => (
 			<Item
-				key={item._id}
-				id={`list_item_${item._id}`}
+				key={`music-item-${item._id}`}
+				item={item}
 				longPress={element => this.itemLongPressed(element)}
-				className={`${mobileUser ? 'mobile' : ''}`}
-				variant="secondary"
+				showActions={item._id === this.state.menuActionItem}
+				menuCalledCallback={() => this.setState({ menuActionItem: item._id === this.state.menuActionItem ? null : item._id })}
+				clickAction={() => clickAction(item._id)}
+				extraActions={[
+					{ icon: 'edit', action: editAction },
+					{ icon: 'trash-alt', action: deleteAction },
+				]}
 			>
-				<Col xs={3} sm={1}></Col>
-				<Col xs={6} sm={10}>
+				<Col>
 					<span className="cut">{item.name}</span>
 				</Col>
-				<Col className="music-list-item-tools" xs={3} sm={1}>
-					<div>
-						<FontAwesomeIcon onClick={(e) => this.props.toggleModal('editPlaylist', item)}
-						                 className="clickable" icon="edit"/>
-					</div>
-					<div>
-						<FontAwesomeIcon
-							onClick={(e) => this.deletePlaylistModal(item._id)}
-							className="clickable" icon="trash-alt"/>
-					</div>
-
-				</Col>
 			</Item>
-		)
+		))
+		return result
+	}
+
+	render() {
+		/**
+		 * Basic render setup
+		 */
+		const searchButton = (
+			<FontAwesomeIcon
+				onClick={this.toggleSearching}
+				className="tool-item clickable"
+				icon={ this.state.searching ? 'times' : 'search'}
+			/>)
+
+		const mobileUser = isMobile()
+		const modeVars = this.modeHandler(mobileUser)
 
 		return (
 			<React.Fragment>
@@ -172,20 +238,18 @@ export class Music extends React.Component {
 				>
 					<div className="header">
 						<Col xs={2} className="back">
-							{backButton}
+							{modeVars.backButton}
 						</Col>
 						<Col xs={8} className="title">
-							{title}
+							{modeVars.title}
 						</Col>
 						<Col xs={2} className="tools">
 							{searchButton}
-							<FontAwesomeIcon className="tool-item clickable"
-											 onClick={() => this.addPlaylistModal()}
-											 icon="plus"/>
+							{modeVars.toolButton}
 						</Col>
 					</div>
 					<div className="list">
-						{listItems}
+						{modeVars.listItems}
 					</div>
 				</Col>
 			</React.Fragment>

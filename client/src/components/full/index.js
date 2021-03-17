@@ -3,7 +3,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import './index.scss'
 
-import {Auth, Player, Music, Search, CustomModal} from "components"
+import {Auth, Player, Music, Search} from "components"
 import {UserService, ModalService, ToastService} from "services"
 import {Footer} from "../footer"
 

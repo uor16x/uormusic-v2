@@ -95,6 +95,10 @@ input {
   width: 48% !important;
   top: 20%;
 
+  .modal-title {
+    max-width: 100%;
+  }
+
   .modal-content {
     background-color: rgba(#565656, 0.85);
     border-radius: 10px;

@@ -30,7 +30,11 @@ export const CustomModal = function ({ header, inputFields = [], submitText, cb 
         <React.Fragment>
             <Modal.Dialog className='custom-modal-dialog'>
                 <Modal.Header>
-                    <Modal.Title>{header}</Modal.Title>
+                    <Modal.Title>
+                        <span className="cut">
+                            {header}
+                        </span>
+                    </Modal.Title>
                 </Modal.Header>
                 {inputs.length > 0 &&
                 <Modal.Body>
