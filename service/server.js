@@ -7,7 +7,8 @@ const express = require('express'),
 	path = require('path'),
 	multer = require('multer'),
 	uuid = require('uuid'),
-	lastfmapi = require('lastfmapi')
+	lastfmapi = require('lastfmapi'),
+	{ Storage } = require('@google-cloud/storage')
 
 process.on('uncaughtException', err => errHandler(err))
 
@@ -17,6 +18,7 @@ module.exports = env => {
 	app.importer = require('./config/importer')(app)
 	app.env = env
 	app.logger = logger
+	app.storage = new Storage({  projectId: app.env.GOOGLE_CLOUD_PROJECT, keyFilename: "gcp-creds.json" })
 
 	db(app)
 		.then(models => {

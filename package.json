@@ -24,6 +24,7 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "@ffprobe-installer/ffprobe": "^1.1.0",
+    "@google-cloud/storage": "^5.8.1",
     "app-root-path": "^3.0.0",
     "bcrypt": "^5.0.1",
     "bluebird": "^3.7.2",

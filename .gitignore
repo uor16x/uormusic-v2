@@ -105,4 +105,7 @@ dist
 
 # Intellij IDE files
 .idea
+
+# other
 /package-lock.json
+gcp-creds.json
