@@ -33,9 +33,10 @@ export const Item = function ({
 		? (
 			<Row className="actions">
 				{extraActions.map(action => (
-					<Col className="item-icon-wrapper clickable" key={`action-item-key-${action.icon}`}>
-						<FontAwesomeIcon onClick={(e) => action.click(id)}
-										 icon={action.icon}/>
+					<Col className="item-icon-wrapper clickable"
+						 onClick={(e) => action.click(id)}
+						 key={`action-item-key-${action.icon}`}>
+						<FontAwesomeIcon icon={action.icon}/>
 					</Col>
 				))}
 			</Row>

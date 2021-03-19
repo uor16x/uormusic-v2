@@ -24,7 +24,6 @@ module.exports = app => {
 			if (!newUser) {
 				return res.result('Error create user')
 			}
-			app.services.storage.createBucket(newUser._id)
 			currUser = newUser
 		} else {
 			// Sign in
@@ -37,6 +36,7 @@ module.exports = app => {
 		const authToken = app.services.jwt.sign({ _id: currUser._id })
 		currUser.token = authToken
 		req.session.token = authToken
+		req.session.userId = currUser._id
 		req.session.save()
 		await currUser.save()
 		return res.result(null, { token: authToken })

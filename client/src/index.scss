@@ -11,6 +11,14 @@ body {
   color: whitesmoke;
 }
 
+.hidden-inputs {
+  width: 0;
+  height: 0;
+  position: absolute;
+  top: -9000px;
+  z-index: 0;
+}
+
 // prevent select
 html {
   height: 100%;

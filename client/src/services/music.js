@@ -8,5 +8,19 @@ export const MusicService = {
     },
     async deletePlaylist(id) {
         return api.delete(`${playlistServicePrefix}/${id}`)
+    },
+    async uploadFiles(playlistId, files) {
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('songs', files[i])
+        }
+        return api({
+            url: `${playlistServicePrefix}/upload/${playlistId}`,
+            method: 'POST',
+            data: formData,
+        })
+    },
+    getSongs(playlistId) {
+        return api.get(`${playlistServicePrefix}/${playlistId}`)
     }
 }

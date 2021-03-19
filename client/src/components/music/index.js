@@ -26,11 +26,14 @@ export class Music extends React.Component {
 
 	constructor(props) {
 		super(props)
+		this.fileUploadRef = React.createRef()
 		this.state = { ...defaultState }
 
 		this.setSearchQuery = this.setSearchQuery.bind(this)
 		this.deletePlaylistModal = this.deletePlaylistModal.bind(this)
 		this.setPlaylist = this.setPlaylist.bind(this)
+		this.selectFiles = this.selectFiles.bind(this)
+		this.upload = this.upload.bind(this)
 		this.toggleSearching = this.toggleSearching.bind(this)
 		this.itemLongPressed = this.itemLongPressed.bind(this)
 	}
@@ -85,6 +88,30 @@ export class Music extends React.Component {
 			})
 	}
 
+	/**
+	 * Songs utils
+	 */
+	updateSongs() {
+		MusicService.getSongs(this.state.currSongs)
+			.then(songs => this.setState({ currSongs: songs }),
+					err => ToastService.publishErr('Error retrieving songs'))
+	}
+	selectFiles() {
+		this.fileUploadRef.current.click()
+	}
+	upload(event) {
+		const files = [...event.target.files]
+		event.target.value = null
+		const playlistId = this.state.currPlaylist
+		MusicService.uploadFiles(playlistId, files)
+			.then(() => {
+				if (this.state.currPlaylist === playlistId) {
+					this.updateSongs()
+				}
+			}).catch(err => {
+			console.error(err)
+		})
+	}
 
 	/**
 	 * Search
@@ -118,7 +145,6 @@ export class Music extends React.Component {
 	 * Modes
 	 */
 
-
 	setPlaylist(id) {
 		if (!id) {
 			this.setState({
@@ -133,8 +159,7 @@ export class Music extends React.Component {
 		})
 	}
 
-
-	modeHandler(mobileUser) {
+	modeHandler() {
 		const result = {
 			backButton: <React.Fragment/>,
 			listItems: [],
@@ -179,13 +204,13 @@ export class Music extends React.Component {
 				)
 			result.toolButton = (
 				<FontAwesomeIcon className="tool-item clickable"
-								 onClick={() => {}}
+								 onClick={this.selectFiles}
 								 icon="upload"/>
 			)
 		} else {
 			list = this.props.playlists
 			clickAction = (id) => this.setPlaylist(id)
-			deleteAction = this.deletePlaylistModal
+			deleteAction = (id) => this.deletePlaylistModal(id)
 			result.toolButton = (
 				<FontAwesomeIcon className="tool-item clickable"
 								 onClick={() => this.addPlaylistModal()}
@@ -202,8 +227,8 @@ export class Music extends React.Component {
 				menuCalledCallback={() => this.setState({ menuActionItem: item._id === this.state.menuActionItem ? null : item._id })}
 				clickAction={() => clickAction(item._id)}
 				extraActions={[
-					{ icon: 'edit', action: editAction },
-					{ icon: 'trash-alt', action: deleteAction },
+					{ icon: 'edit', click: editAction },
+					{ icon: 'trash-alt', click: deleteAction },
 				]}
 			>
 				<Col>
@@ -226,10 +251,17 @@ export class Music extends React.Component {
 			/>)
 
 		const mobileUser = isMobile()
-		const modeVars = this.modeHandler(mobileUser)
+		const modeVars = this.modeHandler()
 
 		return (
 			<React.Fragment>
+				<input type="file"
+					   name="music"
+					   className="hidden-inputs"
+					   multiple
+					   ref={this.fileUploadRef}
+					   accept=".mp3"
+					   onChange={this.upload} />
 				<Col
 					id="music"
 					className={`${this.props.searchMode && mobileUser ? 'collapsed-mobile' : ''}`}

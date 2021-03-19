@@ -1,4 +1,6 @@
-const router = require('express').Router()
+const router = require('express').Router(),
+	{ Readable } = require('stream'),
+	uuid = require('uuid')
 
 module.exports = app => {
 
@@ -21,6 +23,37 @@ module.exports = app => {
 		_user.markModified('playlists')
 		await _user.save()
 		return res.result(null, { playlists })
+	})
+
+	router.post('/upload/:playlistId', app.upload.any(), (req, res) => {
+		req.files.forEach(file => {
+			const filename = `${req.session.userId}_${uuid.v4()}.mp3`
+			const gcsStream = app.storage.bucket('uormusicv2-songs').file(filename).createWriteStream();
+			gcsStream.on('finish', () => {
+				console.log(' gcs finish: ' + Date.now())
+			})
+			gcsStream.on('error', (err) => {
+				console.error(`${ this.archive }: Error storage file write.`);
+				console.error(`${ this.archive }: ${JSON.stringify(err)}`);
+			});
+			const fileStream = new Readable()
+			fileStream._read = () => {}
+			fileStream.push(file.buffer)
+			fileStream.push(null)
+			new app.ffmpeg(fileStream)
+				.audioBitrate(320)
+				.withAudioCodec('libmp3lame')
+				.toFormat('mp3')
+				.outputOptions('-id3v2_version', '4')
+				.on('error', err => {
+					console.error(err)
+				})
+				.on('end', () => {
+					console.log(' ffmpeg end: ' + Date.now())
+				})
+				.pipe(gcsStream, {end:true})
+		})
+		return res.result(null)
 	})
 
 	router.delete('/:id', async (req, res) => {

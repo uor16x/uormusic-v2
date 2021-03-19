@@ -35,7 +35,6 @@ export class Full extends React.Component {
         this.authFail = this.authFail.bind(this)
         this.logout = this.logout.bind(this)
         this.getUser = this.getUser.bind(this)
-        this.addPlaylistCb = this.addPlaylistCb.bind(this)
         this.toggleSearch = this.toggleSearch.bind(this)
     }
 
@@ -86,13 +85,6 @@ export class Full extends React.Component {
             .then(() => {
                 this.setState({ ...defaultState, loading: false })
             })
-    }
-
-    /**
-     * Playlists
-     */
-    addPlaylistCb(data) {
-
     }
 
     /**

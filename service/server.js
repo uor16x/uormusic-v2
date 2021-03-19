@@ -8,7 +8,8 @@ const express = require('express'),
 	multer = require('multer'),
 	uuid = require('uuid'),
 	lastfmapi = require('lastfmapi'),
-	{ Storage } = require('@google-cloud/storage')
+	{ Storage } = require('@google-cloud/storage'),
+	multerStorage = require('multer-google-storage')
 
 process.on('uncaughtException', err => errHandler(err))
 
@@ -23,6 +24,7 @@ module.exports = env => {
 	db(app)
 		.then(models => {
 			app.models = models
+			app.services = app.importer('service')
 			app.set('trust proxy', 1)
 			app.use(session({
 				secret: app.env.COOKIES_SECRET,
@@ -35,19 +37,11 @@ module.exports = env => {
 				'api_key': app.env.LFM_API_KEY,
 				'secret': app.env.LFM_SECRET
 			})
-			app.ytQueue = {}
+			app.queue = {}
 
-			app.storagePath = path.resolve(path.join(__root, './storage/'))
-			const storage = multer.diskStorage({
-				destination: (req, file, cb) => {
-					cb(null, app.storagePath)
-				},
-				filename: (req, file, cb) => {
-					cb(null,
-						`${uuid.v4()}_${file.originalname}`)
-				}
+			app.upload = multer({
+				storage: multer.memoryStorage()
 			})
-			app.upload = multer({ storage: storage })
 
 			app.use((req, res, next) => {
 				res.header('Access-Control-Allow-Origin', app.env.HOSTNAME)
@@ -75,7 +69,6 @@ module.exports = env => {
 			Object.keys(app.controllers).forEach(controller => {
 				app.use(`/${controller}`, app.controllers[controller])
 			})
-			app.services = app.importer('service')
 		})
 		.then(() => {
 			const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
