@@ -2,7 +2,7 @@ import React from 'react'
 import './index.scss'
 import { Col } from 'react-bootstrap'
 import {CustomModal, Item} from 'components'
-import {MusicService, ModalService, ToastService} from 'services'
+import {MusicService, ModalService, ToastService, PlaybackService} from 'services'
 import {isMobile} from 'utils/helper'
 
 import Slide from 'react-reveal/Slide';
@@ -44,6 +44,8 @@ const defaultState = {
 	searchQuery: '',
 	currPlaylist: null,
 	currSongs: [],
+	playingSong: null,
+	playingPlaylist: null,
 	menuActionItem: null,
 	listLoading: false
 }
@@ -140,6 +142,20 @@ export class Music extends React.Component {
 	/**
 	 * Songs
 	 */
+	setSong(songId, playlistId) {
+		const list = playlistId
+			? this.props.playlists.find(listItem => listItem._id === this.state.playingPlaylist)
+			: this.state.currSongs
+		const song = list.find(listItem => listItem._id === songId)
+		PlaybackService.pause()
+		PlaybackService.setSrc(song.url)
+		PlaybackService.play()
+		this.setState({
+			playingSong: songId,
+			playingPlaylist: playlistId || this.state.playingPlaylist
+		})
+	}
+
 	editSongModal(id) {
 		const song = this.state.currSongs.find(song => song._id === id)
 		if (!song) return
@@ -318,7 +334,7 @@ export class Music extends React.Component {
 				song.name = `${song.artist} - ${song.title}`
 				return song
 			})
-			clickAction = (id) => alert(id)
+			clickAction = (id) => this.setSong(id)
 			editAction = (id) => this.editSongModal(id)
 			deleteAction = (id) => this.deleteSongModal(id)
 			result.backButton = (

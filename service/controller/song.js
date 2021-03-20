@@ -30,20 +30,6 @@ module.exports = app => {
 		return res.sendFile(path.resolve(path.join(app.storagePath, req.params.name)))
 	})
 
-	router.get('/get/:id', async (req, res) => {
-		if (!req.params.id) {
-			return res.result('Id missing')
-		}
-		let song
-		try {
-			song = await app.models.Song.findOne({ _id: req.params.id })
-		} catch (err) {
-			app.logger.error(err)
-			return res.result('Song missing')
-		}
-		return res.sendFile(path.join(app.storagePath, song.file))
-	})
-
 	router.delete('/:playlistId/:songId', async (req, res) => {
 		const { playlistId, songId } = req.params
 		if (!playlistId || !songId) {
@@ -89,7 +75,7 @@ module.exports = app => {
 		}
 
 		try {
-			await app.models.Song.findOneAndRemove({ _id: songId })
+			await app.services.music.deleteSongs([songId])
 		} catch (err) {
 			return res.result(`Delete error: ${err.message}`)
 		}

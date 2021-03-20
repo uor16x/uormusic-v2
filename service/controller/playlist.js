@@ -72,10 +72,24 @@ module.exports = app => {
 		}
 		const songs = req.files.map(file => {
 			return app.services.audio.increaseBitrateAndUpload(file)
-				.then(fileName => ({
-					fileName,
-					originalname: file.originalname
-				}))
+				.then(fileName => {
+					const fileRef = app.storage
+						.bucket('uormusicv2-songs')
+						.file(fileName)
+					return bluebird.props({
+						url: fileRef.getSignedUrl({ action: 'read', expires: '01-01-2030'}),
+						data: {
+							fileName,
+							originalname: file.originalname
+						}
+					})
+				})
+				.then(fileData => {
+					return {
+						...fileData.data,
+						url: fileData.url[0]
+					}
+				})
 		})
 		bluebird.all(songs)
 			.then(app.services.music.createSongs)
@@ -97,6 +111,14 @@ module.exports = app => {
 		if (!found) {
 			return res.result('Playlist doesn\'t belong to the user')
 		}
+
+		try {
+			const _playlist = await app.models.Playlist.findOne({ _id: id })
+			await app.services.music.deleteSongs(_playlist.songs)
+		} catch (err) {
+			return res.result(`Error deleting song files: ${err.message}`)
+		}
+
 		_user.playlists = _user.playlists.filter(list => list._id !== id)
 		_user.markModified('playlists')
 		try {
@@ -104,6 +126,8 @@ module.exports = app => {
 		} catch (err) {
 			return res.result(`Save error: ${err.message}`)
 		}
+
+
 
 		return res.result(null)
 	})

@@ -19,7 +19,8 @@ module.exports = app => {
 			const songs = songsData
 				.map(data => {
 					const _song = {
-						file: data.fileName
+						file: data.fileName,
+						url: data.url
 					}
 					const { artist, title } = parseArtistTitle(data.originalname)
 					_song.artist = artist.trim()
@@ -31,6 +32,13 @@ module.exports = app => {
 					})
 				})
 			return bluebird.all(songs)
+		},
+		async deleteSongs(ids) {
+			const songs = await app.models.Song.find({ _id: ids })
+			return bluebird.all([
+				app.models.Song.remove({ _id: ids }),
+				...songs.map(song => app.storage.bucket('uormusicv2-songs').file(song.file).delete())
+			])
 		},
 		async attachSongsToPlaylist(playlist, songs) {
 			const songIds = songs.map(song => song._id)
