@@ -43,5 +43,58 @@ module.exports = app => {
 		}
 		return res.sendFile(path.join(app.storagePath, song.file))
 	})
+
+	router.delete('/:playlistId/:songId', async (req, res) => {
+		const { playlistId, songId } = req.params
+		if (!playlistId || !songId) {
+			return res.result('Id is missing')
+		}
+
+		const user = await app.models.User.findOne({ _id: req.session.userId })
+		const playlistFound = !!user.playlists.find(list => list === playlistId)
+		if (!playlistFound) {
+			return res.result('Playlist doesn\'t belong to this user')
+		}
+
+		let _playlist
+		try {
+			_playlist = await app.models.Playlist.findOne({ _id: playlistId })
+		} catch (err) {
+			return res.result(`Error getting playlist: ${err.message}`)
+		}
+		if (!_playlist) {
+			return res.result('No such playlist')
+		}
+
+		let _song
+		try {
+			_song = await app.models.Song.findOne({ _id: songId })
+		} catch (err) {
+			return res.result(`Error getting song: ${err.message}`)
+		}
+		if (!_song) {
+			return res.result('No such song')
+		}
+
+		const songFound = !!_playlist.songs.find(song => song === songId)
+		if (!songFound) {
+			return res.result('Song doesn\'t belong to this playlist')
+		}
+		_playlist.songs = _playlist.songs.filter(song => song !== songId)
+		_playlist.markModified('playlists')
+		try {
+			await _playlist.save()
+		} catch (err) {
+			return res.result(`Save error: ${err.message}`)
+		}
+
+		try {
+			await app.models.Song.findOneAndRemove({ _id: songId })
+		} catch (err) {
+			return res.result(`Delete error: ${err.message}`)
+		}
+
+		return res.result(null)
+	})
 	return router
 }

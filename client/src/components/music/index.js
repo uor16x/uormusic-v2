@@ -16,6 +16,20 @@ library.add(fab, faSearch, faPlus, faChevronLeft, faTimes, faTrashAlt, faEdit, f
 
 const stubFn = () => {}
 
+const slideWrap = (listItems) => {
+	return listItems.length > 1
+		? (
+			<Slide top>
+				{listItems}
+			</Slide>
+		)
+		: (
+			<React.Fragment>
+				{listItems}
+			</React.Fragment>
+		)
+}
+
 const sameArrayOrder = (arr1, arr2) => {
 	for (let i = 0; i < arr1.length; i++) {
 		if (arr1[i]._id !== arr2[i]._id) {
@@ -30,7 +44,8 @@ const defaultState = {
 	searchQuery: '',
 	currPlaylist: null,
 	currSongs: [],
-	menuActionItem: null
+	menuActionItem: null,
+	listLoading: false
 }
 
 export class Music extends React.Component {
@@ -94,9 +109,7 @@ export class Music extends React.Component {
 	deletePlaylist({ id, name }) {
 		MusicService.deletePlaylist(id)
 			.then(() => this.playlistSuccessAction(`Playlist ${name} deleted!`))
-			.catch(err => {
-				ToastService.publishErr(err.message)
-			})
+			.catch(err => ToastService.publishErr(err.message))
 	}
 	editPlaylistModal(id) {
 		const modal = (
@@ -159,10 +172,36 @@ export class Music extends React.Component {
 		ModalService.publish(modal)
 	}
 
+	deleteSongModal(id) {
+		const song = this.state.currSongs.find(song => song._id === id)
+		if (!song) return
+		const modal = (
+			<CustomModal
+				key={"deleteSong"}
+				submitText={"Delete"}
+				header={`Delete song ${song.title}?`}
+				cb={() => {
+					MusicService.deleteSong(this.state.currPlaylist, id)
+						.then(() => this.updateOrGetSongs())
+						.catch(err => ToastService.publishErr(err.message))
+				}}
+			/>
+		)
+		ModalService.publish(modal)
+		this.setState({
+			menuActionItem: null
+		})
+	}
+
 	/**
 	 * Songs utils
 	 */
 	updateOrGetSongs(playlistId) {
+		if (playlistId) {
+			this.setState({
+				listLoading: true
+			})
+		}
 		return MusicService.getSongs(playlistId || this.state.currPlaylist)
 			.then(response => {
 				if (playlistId) {
@@ -234,7 +273,8 @@ export class Music extends React.Component {
 				this.setState({
 					currPlaylist: id,
 					currSongs: songs,
-					menuActionItem: null
+					menuActionItem: null,
+					listLoading: false
 				})
 			})
 	}
@@ -387,7 +427,8 @@ export class Music extends React.Component {
 						</Col>
 					</div>
 					{
-						modeVars.listItems
+						!this.state.listLoading
+						&& modeVars.listItems
 						&& modeVars.listItems.length > 0
 						&& (
 							<div className="list">
@@ -395,9 +436,7 @@ export class Music extends React.Component {
 									list={modeVars.list}
 									setList={(newList) => this.setSortedList(newList)}
 								>
-									<Slide top>
-										{modeVars.listItems}
-									</Slide>
+									{slideWrap(modeVars.listItems)}
 								</ReactSortable>
 							</div>
 						)

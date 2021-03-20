@@ -10,6 +10,9 @@ export const MusicService = {
     async deletePlaylist(id) {
         return api.delete(`${playlistServicePrefix}/${id}`)
     },
+    async deleteSong(playlistId, songId) {
+        return api.delete(`${songServicePrefix}/${playlistId}/${songId}`)
+    },
     async updatePlaylist(id, body) {
         return api.post(`${playlistServicePrefix}/${id}`, body)
     },
