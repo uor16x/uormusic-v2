@@ -16,7 +16,11 @@ module.exports = app => {
 		}
 		song.artist = artist
 		song.title = title
-		await song.save()
+		try {
+			await song.save()
+		} catch (err) {
+			return res.result(`Save error: ${err.message}`)
+		}
 		return res.result(null)
 	})
 	router.get('/get/file/:name', async (req, res) => {

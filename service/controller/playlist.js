@@ -8,11 +8,21 @@ module.exports = app => {
 		if (!name) {
 			return res.result('Playlist name is missing')
 		}
-		let _user = await app.services.user.get({ token: req.session.token })
+		let _user
+		try {
+			_user = await app.services.user.get({ token: req.session.token })
+		} catch (err) {
+			return res.result(`Error getting user: ${err.message}`)
+		}
 		if (!_user) {
 			return res.result('No such user')
 		}
-		const _playlist = await app.services.music.createPlaylist(name)
+		let _playlist
+		try {
+			_playlist = await app.services.music.createPlaylist(name)
+		} catch (err) {
+			return res.result(`Error getting playlist: ${err.message}`)
+		}
 		const playlists = [
 			_playlist,
 			..._user.playlists
@@ -20,12 +30,22 @@ module.exports = app => {
 		_user.playlists = playlists.map(list => list._id)
 
 		_user.markModified('playlists')
-		await _user.save()
+		try {
+			await _user.save()
+		} catch (err) {
+			return res.result(`Save error: ${err.message}`)
+		}
+
 		return res.result(null, { playlists })
 	})
 
 	router.post('/:playlistId', async (req, res) => {
-		const playlist = await app.models.Playlist.findOne({ _id: req.params.playlistId })
+		let playlist
+		try {
+			playlist = await app.models.Playlist.findOne({ _id: req.params.playlistId })
+		} catch (err) {
+			return res.result(`Error getting playlist: ${err.message}`)
+		}
 		if (!playlist) {
 			return res.result('No such playlist')
 		}
@@ -37,7 +57,11 @@ module.exports = app => {
 			playlist.songs = songs
 			playlist.markModified('songs')
 		}
-		await playlist.save()
+		try {
+			await playlist.save()
+		} catch (err) {
+			return res.result(`Save error: ${err.message}`)
+		}
 		return res.result(null)
 	})
 
@@ -75,7 +99,11 @@ module.exports = app => {
 		}
 		_user.playlists = _user.playlists.filter(list => list._id !== id)
 		_user.markModified('playlists')
-		await _user.save()
+		try {
+			await _user.save()
+		} catch (err) {
+			return res.result(`Save error: ${err.message}`)
+		}
 
 		return res.result(null)
 	})
@@ -85,7 +113,12 @@ module.exports = app => {
 		if (!id) {
 			return res.result('Playlist id required')
 		}
-		let _user = await app.services.user.get({ token: req.session.token })
+		let _user
+		try {
+			_user = await app.services.user.get({ token: req.session.token })
+		} catch(err) {
+			return res.result(`Error getting user: ${err.message}`)
+		}
 		if (!_user) {
 			return res.result('No such user')
 		}
