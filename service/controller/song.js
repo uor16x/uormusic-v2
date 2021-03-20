@@ -2,37 +2,23 @@ const router = require('express').Router(),
 	path = require('path')
 
 module.exports = app => {
-	router.put('/:id', app.upload.array("songs[]", 1000), async (req, res) => {
-		if (!req.files || req.files.length === 0) {
-			return res.result('No files')
+	router.post('/:id', async (req, res) => {
+		const song = await app.models.Song.findOne({ _id: req.params.id })
+		if (!song) {
+			return res.result('No such song')
 		}
-		const playlistId = req.params.id
-		if (!playlistId) {
-			return res.result('Playlist id required')
+		const { artist, title } = req.body
+		if (!artist) {
+			return res.result('Artist is missing')
 		}
-		const _user = await app.services.user.get({ token: req.session.token })
-		const _playlist = _user && _user.playlists.find(list => list._id === playlistId)
-		if (!_playlist) {
-			return res.result('No such playlist attached to current user')
+		if (!title) {
+			return res.result('Title is missing')
 		}
-		let songs
-		try {
-			songs = await app.services.music.createSongs(req.files)
-		} catch (err) {
-			return res.result(err)
-		}
-
-		const listSongs = [
-			...songs.filter(s => s).map(song => song._id),
-			..._playlist.songs.filter(s => s)
-		]
-		_playlist.songs = [ ...listSongs ]
-
-		_playlist.markModified('playlists')
-		await _playlist.save()
-		return res.result()
+		song.artist = artist
+		song.title = title
+		await song.save()
+		return res.result(null)
 	})
-
 	router.get('/get/file/:name', async (req, res) => {
 		if (!req.params.name) {
 			return res.result('File location missing')

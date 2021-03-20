@@ -19,70 +19,27 @@ module.exports = app => {
 			const songs = songsData
 				.map(data => {
 					const _song = {
-						file: data.filename
+						file: data.fileName
 					}
 					const { artist, title } = parseArtistTitle(data.originalname)
 					_song.artist = artist.trim()
 					_song.title = title.trim()
 					_song.originalName = data.originalname.replace('.mp3', '')
-					return _song
-				})
-			return bluebird.all(
-				songs.map(song => {
-					const srcPath = path.join(app.storagePath, song.file)
-					const destPath = `${srcPath}_320`
-					return app.services.audio.increaseBitrate(srcPath, destPath).then(() => {
-						song.file = `${song.file}_320`
-						return song
-					}, err => {
-						throw new Error(`Cant increase bitrate for ${song.originalName}`)
+					return app.models.Song.create({
+						..._song,
+						_id: uuid.v4()
 					})
 				})
-			)
-				.then(songs => {
-					return bluebird.all(
-						songs.map(song => {
-							const srcPath = path.join(app.storagePath, song.file)
-							return app.services.audio.metadata(srcPath).then(metadata => {
-								if (metadata && metadata.format && metadata.format.duration) {
-									song.duration = metadata.format.duration
-								}
-								return song
-							}, err => {
-								throw new Error(`Cant get metadata for ${song.originalName}`)
-							})
-						})
-					)
-				})
-				.then(songs => {
-					return bluebird.all(
-						songs.map(song => {
-							return app.services.lfm.search({
-								artist: song.artist,
-								title: song.title,
-								originalName: song.originalName
-							})
-								.then(track => {
-									if (track && track.album && track.album.image) {
-										song.cover = {
-											local: false,
-											path: track.album.image[1]['#text']
-										}
-									}
-									return app.models.Song.create({
-										...song,
-										_id: uuid.v4()
-									})
-								}, err => {
-									app.logger.debug(`${song.originalName} cover not found`)
-									return app.models.Song.create({
-										...song,
-										_id: uuid.v4()
-									})
-								})
-						})
-					)
-				})
+			return bluebird.all(songs)
+		},
+		async attachSongsToPlaylist(playlist, songs) {
+			const songIds = songs.map(song => song._id)
+			playlist.songs = [
+				...songIds,
+				...playlist.songs,
+			]
+			playlist.markModified('songs')
+			return playlist.save()
 		}
 	}
 }

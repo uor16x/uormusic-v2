@@ -37,7 +37,7 @@ module.exports = env => {
 				'api_key': app.env.LFM_API_KEY,
 				'secret': app.env.LFM_SECRET
 			})
-			app.queue = {}
+			app.uploadQueue = {}
 
 			app.upload = multer({
 				storage: multer.memoryStorage()

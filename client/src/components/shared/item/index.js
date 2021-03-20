@@ -34,7 +34,7 @@ export const Item = function ({
 			<Row className="actions">
 				{extraActions.map(action => (
 					<Col className="item-icon-wrapper clickable"
-						 onClick={(e) => action.click(id)}
+						 onClick={() => action.click()}
 						 key={`action-item-key-${action.icon}`}>
 						<FontAwesomeIcon icon={action.icon}/>
 					</Col>
@@ -48,7 +48,7 @@ export const Item = function ({
 			<div className="item" id={id} onClick={clickAction} onContextMenu={(e) => handleMenu(e)} {...bind}>
 				{props.children}
 			</div>
-			{actions}
+			{showActions && actions}
 		</div>
 
 	)

@@ -56,8 +56,10 @@ export class Full extends React.Component {
                     loading: false,
                     user
                 })
-                if (afterLogin && user) {
-                    ToastService.publishInfo(`Welcome back, ${user.username}`)
+                if (user) {
+                    if (afterLogin) {
+                        ToastService.publishInfo(`Welcome back, ${user.username}`)
+                    }
                     ModalService.subscribe(modal => {
                         this.setState({
                             modal

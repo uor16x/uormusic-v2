@@ -1,6 +1,5 @@
 const router = require('express').Router(),
-	{ Readable } = require('stream'),
-	uuid = require('uuid')
+	bluebird = require('bluebird')
 
 module.exports = app => {
 
@@ -25,35 +24,40 @@ module.exports = app => {
 		return res.result(null, { playlists })
 	})
 
-	router.post('/upload/:playlistId', app.upload.any(), (req, res) => {
-		req.files.forEach(file => {
-			const filename = `${req.session.userId}_${uuid.v4()}.mp3`
-			const gcsStream = app.storage.bucket('uormusicv2-songs').file(filename).createWriteStream();
-			gcsStream.on('finish', () => {
-				console.log(' gcs finish: ' + Date.now())
-			})
-			gcsStream.on('error', (err) => {
-				console.error(`${ this.archive }: Error storage file write.`);
-				console.error(`${ this.archive }: ${JSON.stringify(err)}`);
-			});
-			const fileStream = new Readable()
-			fileStream._read = () => {}
-			fileStream.push(file.buffer)
-			fileStream.push(null)
-			new app.ffmpeg(fileStream)
-				.audioBitrate(320)
-				.withAudioCodec('libmp3lame')
-				.toFormat('mp3')
-				.outputOptions('-id3v2_version', '4')
-				.on('error', err => {
-					console.error(err)
-				})
-				.on('end', () => {
-					console.log(' ffmpeg end: ' + Date.now())
-				})
-				.pipe(gcsStream, {end:true})
-		})
+	router.post('/:playlistId', async (req, res) => {
+		const playlist = await app.models.Playlist.findOne({ _id: req.params.playlistId })
+		if (!playlist) {
+			return res.result('No such playlist')
+		}
+		const { name, songs } = req.body
+		if (name) {
+			playlist.name = name
+		}
+		if (songs) {
+			playlist.songs = songs
+			playlist.markModified('songs')
+		}
+		await playlist.save()
 		return res.result(null)
+	})
+
+	router.post('/upload/:playlistId', app.upload.any(), async (req, res) => {
+		const playlist = await app.models.Playlist.findOne({ _id: req.params.playlistId })
+		if (!playlist) {
+			return res.result('No such playlist')
+		}
+		const songs = req.files.map(file => {
+			return app.services.audio.increaseBitrateAndUpload(file)
+				.then(fileName => ({
+					fileName,
+					originalname: file.originalname
+				}))
+		})
+		bluebird.all(songs)
+			.then(app.services.music.createSongs)
+			.then(createdSongs => app.services.music.attachSongsToPlaylist(playlist, createdSongs))
+			.then(() => res.result(null))
+			.catch(err => res.result(err.message))
 	})
 
 	router.delete('/:id', async (req, res) => {

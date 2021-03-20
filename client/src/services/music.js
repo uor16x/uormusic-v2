@@ -1,6 +1,7 @@
 import api from 'utils/api'
 
-const playlistServicePrefix = 'playlist'
+const playlistServicePrefix = 'playlist',
+    songServicePrefix = 'song'
 
 export const MusicService = {
     async addPlaylist(name) {
@@ -8,6 +9,12 @@ export const MusicService = {
     },
     async deletePlaylist(id) {
         return api.delete(`${playlistServicePrefix}/${id}`)
+    },
+    async updatePlaylist(id, body) {
+        return api.post(`${playlistServicePrefix}/${id}`, body)
+    },
+    async updateSong(id, body) {
+        return api.post(`${songServicePrefix}/${id}`, body)
     },
     async uploadFiles(playlistId, files) {
         const formData = new FormData();
@@ -17,6 +24,7 @@ export const MusicService = {
         return api({
             url: `${playlistServicePrefix}/upload/${playlistId}`,
             method: 'POST',
+            timeout: 300000,
             data: formData,
         })
     },

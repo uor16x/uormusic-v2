@@ -10,15 +10,6 @@ const songSchema = mongoose.Schema({
 	artist: String,
 	originalName: String,
 	file: String,
-	duration: Number,
-
-	cover: {
-		local: {
-			type: Boolean,
-			default: false
-		},
-		path: String
-	}
 }, { _id: false, timestamps: true })
 
 songSchema.options.toJSON = {

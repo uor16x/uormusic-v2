@@ -5,10 +5,8 @@ import { Full } from "components/full";
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Full />
-  </React.StrictMode>,
-  document.getElementById('root')
+    <Full />,
+    document.getElementById('root')
 );
 
 // If you want to start measuring performance in your app, pass a function

@@ -9,6 +9,8 @@
   overflow-y: hidden;
   padding: 0;
   border-top-right-radius: 0;
+  -webkit-animation: slide-top .4s ease-out;
+  -moz-animation: slide-top .4s ease-out;
 
   &.collapsed-mobile {
     display: none;
@@ -48,6 +50,8 @@
     padding: 0 15px;
     scrollbar-width: thin;
     scrollbar-color: $main rgba($main, 0.1);
+    -webkit-animation: slide-top .4s ease-out;
+    -moz-animation: slide-top .4s ease-out;
 
     .item {
       background-color: rgba(black, 0.1);

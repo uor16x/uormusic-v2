@@ -5,7 +5,9 @@ import {CustomModal, Item} from 'components'
 import {MusicService, ModalService, ToastService} from 'services'
 import {isMobile} from 'utils/helper'
 
+import Slide from 'react-reveal/Slide';
 import 'react-toastify/dist/ReactToastify.css'
+import { ReactSortable } from 'react-sortablejs'
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {fab} from '@fortawesome/free-brands-svg-icons'
@@ -13,6 +15,15 @@ import {faSearch, faChevronLeft, faPlus, faTimes, faTrashAlt, faEdit, faUpload} 
 library.add(fab, faSearch, faPlus, faChevronLeft, faTimes, faTrashAlt, faEdit, faUpload)
 
 const stubFn = () => {}
+
+const sameArrayOrder = (arr1, arr2) => {
+	for (let i = 0; i < arr1.length; i++) {
+		if (arr1[i]._id !== arr2[i]._id) {
+			return false
+		}
+	}
+	return true
+}
 
 const defaultState = {
 	searching: false,
@@ -87,14 +98,79 @@ export class Music extends React.Component {
 				ToastService.publishErr(err.message)
 			})
 	}
+	editPlaylistModal(id) {
+		const modal = (
+			<CustomModal
+				key={"editPlaylist"}
+				submitText={"Save"}
+				header={"Edit playlist"}
+				inputFields={[{
+					key: 'name',
+					placeholder: 'Playlist name',
+					value: this.props.playlists.find(list => list._id === id).name
+				}]}
+				cb={(data) => {
+					if (data.name) {
+						MusicService.updatePlaylist(id, { name: data.name })
+							.then(() => this.props.triggerGetUser())
+							.catch(() => ToastService.publishErr('Failed to update item order'))
+					}
+					this.setState({
+						menuActionItem: null
+					})
+				}}
+			/>
+		)
+		ModalService.publish(modal)
+	}
+
+	/**
+	 * Songs
+	 */
+	editSongModal(id) {
+		const song = this.state.currSongs.find(song => song._id === id)
+		if (!song) return
+		const modal = (
+			<CustomModal
+				key={"editSong"}
+				submitText={"Save"}
+				header={"Edit song"}
+				inputFields={[{
+					key: 'artist',
+					placeholder: 'Artist',
+					value: song.artist
+				}, {
+					key: 'title',
+					placeholder: 'Title',
+					value: song.title
+				}]}
+				cb={(data) => {
+					if (data.artist && data.title) {
+						MusicService.updateSong(id, data)
+							.then(() => this.updateOrGetSongs())
+							.catch(() => ToastService.publishErr('Failed to update song'))
+					}
+					this.setState({
+						menuActionItem: null
+					})
+				}}
+			/>
+		)
+		ModalService.publish(modal)
+	}
 
 	/**
 	 * Songs utils
 	 */
-	updateSongs() {
-		MusicService.getSongs(this.state.currSongs)
-			.then(songs => this.setState({ currSongs: songs }),
-					err => ToastService.publishErr('Error retrieving songs'))
+	updateOrGetSongs(playlistId) {
+		return MusicService.getSongs(playlistId || this.state.currPlaylist)
+			.then(response => {
+				if (playlistId) {
+					return response.songs
+				} else {
+					this.setState({ currSongs: response.songs })
+				}
+			}, err => ToastService.publishErr('Error retrieving songs'))
 	}
 	selectFiles() {
 		this.fileUploadRef.current.click()
@@ -105,8 +181,9 @@ export class Music extends React.Component {
 		const playlistId = this.state.currPlaylist
 		MusicService.uploadFiles(playlistId, files)
 			.then(() => {
+				ToastService.publishSuccess('Upload from disk finished!')
 				if (this.state.currPlaylist === playlistId) {
-					this.updateSongs()
+					this.updateOrGetSongs()
 				}
 			}).catch(err => {
 			console.error(err)
@@ -152,11 +229,14 @@ export class Music extends React.Component {
 				menuActionItem: null
 			})
 		}
-		this.setState({
-			currPlaylist: id,
-			currSongs: [],
-			menuActionItem: null
-		})
+		this.updateOrGetSongs(id)
+			.then(songs => {
+				this.setState({
+					currPlaylist: id,
+					currSongs: songs,
+					menuActionItem: null
+				})
+			})
 	}
 
 	modeHandler() {
@@ -194,8 +274,13 @@ export class Music extends React.Component {
 		}
 
 		if (this.state.currPlaylist) {
-			list = this.state.currSongs
+			list = this.state.currSongs.map(song => {
+				song.name = `${song.artist} - ${song.title}`
+				return song
+			})
 			clickAction = (id) => alert(id)
+			editAction = (id) => this.editSongModal(id)
+			deleteAction = (id) => this.deleteSongModal(id)
 			result.backButton = (
 				<FontAwesomeIcon
 					className="clickable"
@@ -210,6 +295,7 @@ export class Music extends React.Component {
 		} else {
 			list = this.props.playlists
 			clickAction = (id) => this.setPlaylist(id)
+			editAction = (id) => this.editPlaylistModal(id)
 			deleteAction = (id) => this.deletePlaylistModal(id)
 			result.toolButton = (
 				<FontAwesomeIcon className="tool-item clickable"
@@ -227,8 +313,8 @@ export class Music extends React.Component {
 				menuCalledCallback={() => this.setState({ menuActionItem: item._id === this.state.menuActionItem ? null : item._id })}
 				clickAction={() => clickAction(item._id)}
 				extraActions={[
-					{ icon: 'edit', click: editAction },
-					{ icon: 'trash-alt', click: deleteAction },
+					{ icon: 'edit', click: () => editAction(item._id) },
+					{ icon: 'trash-alt', click: () => deleteAction(item._id) },
 				]}
 			>
 				<Col>
@@ -236,7 +322,27 @@ export class Music extends React.Component {
 				</Col>
 			</Item>
 		))
+		result.list = list
 		return result
+	}
+
+	setSortedList(newList) {
+		let oldList = this.state.currPlaylist
+			? this.state.currSongs
+			: this.props.playlists
+		if (!sameArrayOrder(newList, oldList)) {
+			if (this.state.currPlaylist) {
+				this.setState({
+					currSongs: newList,
+					menuActionItem: null
+				})
+				MusicService.updatePlaylist(this.state.currPlaylist, { songs: newList.map(song => song._id) })
+					.then(() => this.props.triggerGetUser())
+					.catch(() => ToastService.publishErr('Failed to update item order'))
+			} else {
+				console.log('Update playlists')
+			}
+		}
 	}
 
 	render() {
@@ -280,9 +386,22 @@ export class Music extends React.Component {
 							{modeVars.toolButton}
 						</Col>
 					</div>
-					<div className="list">
-						{modeVars.listItems}
-					</div>
+					{
+						modeVars.listItems
+						&& modeVars.listItems.length > 0
+						&& (
+							<div className="list">
+								<ReactSortable
+									list={modeVars.list}
+									setList={(newList) => this.setSortedList(newList)}
+								>
+									<Slide top>
+										{modeVars.listItems}
+									</Slide>
+								</ReactSortable>
+							</div>
+						)
+					}
 				</Col>
 			</React.Fragment>
 		)
