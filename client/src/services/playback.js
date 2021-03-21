@@ -20,6 +20,7 @@ export const PlaybackService = {
         this.playbackCallbacks.forEach(fn => fn());
     },
 
+
     setAudio(audioRef) {
         this.audio = audioRef
     },

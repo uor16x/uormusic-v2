@@ -15,7 +15,9 @@ export class Player extends React.Component {
 		super(props)
 		this.state = {
 			playing: PlaybackService.playing,
-			song: PlaybackService.song
+			song: PlaybackService.song,
+			totalTime: null,
+			currentTime: null
 		}
 	}
 
@@ -26,6 +28,22 @@ export class Player extends React.Component {
 				song: PlaybackService.song
 			})
 		})
+		const audio = PlaybackService.audio
+		audio.ontimeupdate = () => {
+			this.setState({
+				currentTime: this.convertTime(audio.currentTime),
+				totalTime: this.convertTime(audio.duration)
+			})
+		}
+	}
+
+	convertTime(time) {
+		const seconds = parseInt(time);
+		const minutes = Math.floor(seconds / 60);
+		const finalMinutes = minutes < 10 ? `0${minutes}` : minutes;
+		const remainingSeconds = seconds % 60;
+		const finalSeconds = remainingSeconds < 10 ? `0${remainingSeconds}` : remainingSeconds;
+		return (!isNaN(finalMinutes) && !isNaN(finalSeconds)) ? `${finalMinutes}:${finalSeconds}` : null;
 	}
 
 	play() {
@@ -36,8 +54,22 @@ export class Player extends React.Component {
 		PlaybackService.pause()
 	}
 
-	render() {
 
+
+	render() {
+		const titleText = (this.state.song && this.state.song.name) || ''
+		const title = PlaybackService.playing
+			? (
+				// eslint-disable-next-line
+				<marquee direction="left">
+					{titleText}
+				</marquee>
+			)
+			: <span className="cut">{titleText}</span>
+
+		const time = this.state.currentTime && this.state.totalTime
+			? `${this.state.currentTime} / ${this.state.totalTime}`
+			: null
 		return (
 			<Slide top>
 				<div id="player">
@@ -75,16 +107,14 @@ export class Player extends React.Component {
 								icon="step-forward"/>
 						</div>
 					</Col>
-					<Col className="d-none d-sm-flex col-sm-3 col-md-2 col-lg-1 timestamp">
+					<Col className="d-none d-sm-flex col-sm-3 col-md-2 timestamp">
 						<div className="control">
-							00:00/00:00
+							{time}
 						</div>
 					</Col>
-					<Col className="d-none d-sm-flex col-sm-4 col-md-5 col-lg-6 title cut">
+					<Col className="d-none d-sm-flex col-sm-4 col-md-5 title cut">
 						<div className="control">
-							<span className="cut">
-								{this.state.song && this.state.song.name}
-							</span>
+							{title}
 						</div>
 					</Col>
 					<Col xs="6" sm="3" className="utils">
