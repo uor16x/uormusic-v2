@@ -10,7 +10,6 @@ export const Item = function ({
 								  id,
 								  active,
 								  longPress,
-								  showActions = false,
 								  menuCalledCallback,
 								  extraActions=[],
 								  ...props
@@ -20,17 +19,18 @@ export const Item = function ({
 		event.preventDefault()
 		menuCalledCallback()
 	}
-
-	if (!isMobile() || !longPress) {
+	const mobile = isMobile()
+	if (!mobile || !longPress) {
 		longPress = () => {
 			menuCalledCallback()
 		}
 	}
-	const bind = useLongPress(element => longPress(element.target.closest('.item')), {
+
+	const bind = useLongPress(element => mobile ? longPress(element.target.closest('.item')) : (() => {}), {
 		captureEvent: true
 	})
 
-	const actions = showActions
+	const actions = extraActions && extraActions.length > 0
 		? (
 			<Row className="actions">
 				{extraActions.map(action => (
@@ -42,8 +42,10 @@ export const Item = function ({
 				))}
 			</Row>
 		)
-		: null
+		: []
 
+
+	console.log(actions)
 	return (
 		<div className="item-wrapper">
 			<div
@@ -55,7 +57,7 @@ export const Item = function ({
 			>
 				{props.children}
 			</div>
-			{showActions && actions}
+			{actions}
 		</div>
 
 	)

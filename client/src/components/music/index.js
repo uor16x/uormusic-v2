@@ -375,25 +375,29 @@ export class Music extends React.Component {
 			)
 		}
 
-		result.listItems = list.map(item => (
-			<Item
-				key={`music-item-${item._id}`}
-				item={item}
-				active={isActive(item._id)}
-				longPress={element => this.itemLongPressed(element)}
-				showActions={item._id === this.state.menuActionItem}
-				menuCalledCallback={() => this.setState({ menuActionItem: item._id === this.state.menuActionItem ? null : item._id })}
-				clickAction={() => clickAction(item._id)}
-				extraActions={[
+		result.listItems = list.map(item => {
+			const extraActions = this.state.menuActionItem === item._id
+				? [
 					{ icon: 'edit', click: () => editAction(item._id) },
 					{ icon: 'trash-alt', click: () => deleteAction(item._id) },
-				]}
-			>
-				<Col>
-					<span className="cut">{item.name}</span>
-				</Col>
-			</Item>
-		))
+				]
+				: []
+			return (
+				<Item
+					key={`music-item-${item._id}`}
+					item={item}
+					active={isActive(item._id)}
+					longPress={element => this.itemLongPressed(element)}
+					menuCalledCallback={() => this.setState({ menuActionItem: item._id === this.state.menuActionItem ? null : item._id })}
+					clickAction={() => clickAction(item._id)}
+					extraActions={extraActions}
+				>
+					<Col>
+						<span className="cut">{item.name}</span>
+					</Col>
+				</Item>
+			)
+		})
 		result.list = list
 		return result
 	}
