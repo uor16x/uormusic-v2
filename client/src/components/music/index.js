@@ -46,6 +46,7 @@ const defaultState = {
 	currSongs: [],
 	playingSong: null,
 	playingPlaylist: null,
+	playingSongs: null,
 	menuActionItem: null,
 	listLoading: false
 }
@@ -68,6 +69,9 @@ export class Music extends React.Component {
 
 	componentDidMount() {
 		PlaybackService.setAudio(document.getElementById('audio'))
+		PlaybackService.subscribeNextSong(id => {
+			this.setSong(id, true)
+		})
 	}
 
 	/**
@@ -146,17 +150,18 @@ export class Music extends React.Component {
 	/**
 	 * Songs
 	 */
-	setSong(songId, playlistId) {
-		const list = playlistId
-			? this.props.playlists.find(listItem => listItem._id === this.state.playingPlaylist)
-			: this.state.currSongs
-		const song = list.find(listItem => listItem._id === songId)
+	setSong(songId, auto = false) {
+		const playlist = this.props.playlists.find(listItem =>
+			listItem._id === (auto ? this.state.playingPlaylist : this.state.currPlaylist))
+		const currentSongsList = auto ? this.state.playingSongs : this.state.currSongs
+		const song = currentSongsList.find(listSong => listSong._id === songId)
 		PlaybackService.pause()
-		PlaybackService.setSong(song, list)
+		PlaybackService.setSong(song, playlist)
 		PlaybackService.play()
 		this.setState({
 			playingSong: songId,
-			playingPlaylist:  playlistId || this.state.playingPlaylist
+			playingSongs: currentSongsList,
+			playingPlaylist: playlist._id
 		})
 	}
 

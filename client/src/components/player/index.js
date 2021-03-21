@@ -54,7 +54,9 @@ export class Player extends React.Component {
 		PlaybackService.pause()
 	}
 
-
+	next() {
+		PlaybackService.next()
+	}
 
 	render() {
 		const titleText = (this.state.song && this.state.song.name) || ''
@@ -103,7 +105,7 @@ export class Player extends React.Component {
 						<div className="control">
 							<FontAwesomeIcon
 								className="clickable"
-								onClick={() => alert('')}
+								onClick={() => this.next()}
 								icon="step-forward"/>
 						</div>
 					</Col>
@@ -113,7 +115,7 @@ export class Player extends React.Component {
 						</div>
 					</Col>
 					<Col className="d-none d-sm-flex col-sm-4 col-md-5 title cut">
-						<div className="control">
+						<div className="control" style={({ paddingBottom: '2px' })}>
 							{title}
 						</div>
 					</Col>

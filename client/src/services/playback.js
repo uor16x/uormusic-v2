@@ -20,6 +20,14 @@ export const PlaybackService = {
         this.playbackCallbacks.forEach(fn => fn());
     },
 
+    nextSongCallbacks: [],
+    subscribeNextSong(fn) {
+        this.nextSongCallbacks.push(fn);
+    },
+    nextSongPublish(id) {
+        this.nextSongCallbacks.forEach(fn => fn(id));
+    },
+
 
     setAudio(audioRef) {
         this.audio = audioRef
@@ -57,5 +65,17 @@ export const PlaybackService = {
             this.playing = false
         }
         this.playbackAction()
+    },
+
+    next() {
+        this.checkAudio()
+        if (!this.playlist || !this.song) return
+        this.pause()
+        const currentSongIndex = this.playlist.songs
+            .findIndex(songId => songId === this.song._id)
+        const newIndex = currentSongIndex === this.playlist.songs.length - 1
+            ? 0
+            : currentSongIndex + 1
+        this.nextSongPublish(this.playlist.songs[newIndex])
     }
 }

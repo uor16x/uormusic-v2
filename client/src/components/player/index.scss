@@ -18,6 +18,11 @@
 
   .timestamp {
     align-items: center;
+
+    .control {
+      font-size: 17px;
+      min-width: 100px;
+    }
   }
 
   .control {
