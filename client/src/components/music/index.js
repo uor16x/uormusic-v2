@@ -11,8 +11,8 @@ import { ReactSortable } from 'react-sortablejs'
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {fab} from '@fortawesome/free-brands-svg-icons'
-import {faSearch, faChevronLeft, faPlus, faTimes, faTrashAlt, faEdit, faUpload} from '@fortawesome/free-solid-svg-icons'
-library.add(fab, faSearch, faPlus, faChevronLeft, faTimes, faTrashAlt, faEdit, faUpload)
+import {faSearch, faChevronLeft, faPlus, faTimes, faTrashAlt, faEdit, faUpload, faSpinner} from '@fortawesome/free-solid-svg-icons'
+library.add(fab, faSearch, faPlus, faChevronLeft, faTimes, faTrashAlt, faEdit, faUpload, faSpinner)
 
 const stubFn = () => {}
 
@@ -356,6 +356,13 @@ export class Music extends React.Component {
 			)
 		} else {
 			list = this.props.playlists
+
+			if (this.state.listLoading) {
+				result.backButton = (
+					<FontAwesomeIcon className="tool-item"
+									 icon="spinner"/>
+				)
+			}
 
 			isActive = id => PlaybackService.playlist && PlaybackService.playlist._id === id
 			clickAction = (id) => this.setPlaylist(id)
