@@ -17,6 +17,10 @@
   cursor: pointer;
   text-align: center;
   justify-content: center;
+
+  &.active {
+    background-color: rgba($main, 0.45)!important;
+  }
 }
 
 .actions {

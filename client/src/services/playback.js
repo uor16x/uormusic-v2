@@ -2,6 +2,7 @@ export const PlaybackService = {
     audio: null,
     playing: false,
     song: null,
+    playlist: null,
 
     showPlayerCallbacks: [],
     subscribeShowPlayer(fn) {
@@ -29,12 +30,13 @@ export const PlaybackService = {
         }
     },
 
-    setSong(song) {
+    setSong(song, playlist) {
         this.checkAudio()
         if (!this.song && song) {
             this.showPlayer()
         }
         this.song = song
+        this.playlist = playlist
         this.audio.src = this.song.url
     },
 

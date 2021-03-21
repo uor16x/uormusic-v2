@@ -152,11 +152,11 @@ export class Music extends React.Component {
 			: this.state.currSongs
 		const song = list.find(listItem => listItem._id === songId)
 		PlaybackService.pause()
-		PlaybackService.setSong(song)
+		PlaybackService.setSong(song, list)
 		PlaybackService.play()
 		this.setState({
 			playingSong: songId,
-			playingPlaylist: playlistId || this.state.playingPlaylist
+			playingPlaylist:  playlistId || this.state.playingPlaylist
 		})
 	}
 
@@ -310,7 +310,8 @@ export class Music extends React.Component {
 		let list = [],
 			editAction = stubFn,
 			deleteAction = stubFn,
-			clickAction = stubFn
+			clickAction = stubFn,
+			isActive = stubFn
 
 		if (this.state.searching) {
 			result.title = (
@@ -338,6 +339,7 @@ export class Music extends React.Component {
 				song.name = `${song.artist} - ${song.title}`
 				return song
 			})
+			isActive = id => PlaybackService.song && PlaybackService.song._id === id
 			clickAction = (id) => this.setSong(id)
 			editAction = (id) => this.editSongModal(id)
 			deleteAction = (id) => this.deleteSongModal(id)
@@ -354,6 +356,8 @@ export class Music extends React.Component {
 			)
 		} else {
 			list = this.props.playlists
+
+			isActive = id => PlaybackService.playlist && PlaybackService.playlist._id === id
 			clickAction = (id) => this.setPlaylist(id)
 			editAction = (id) => this.editPlaylistModal(id)
 			deleteAction = (id) => this.deletePlaylistModal(id)
@@ -368,6 +372,7 @@ export class Music extends React.Component {
 			<Item
 				key={`music-item-${item._id}`}
 				item={item}
+				active={isActive(item._id)}
 				longPress={element => this.itemLongPressed(element)}
 				showActions={item._id === this.state.menuActionItem}
 				menuCalledCallback={() => this.setState({ menuActionItem: item._id === this.state.menuActionItem ? null : item._id })}

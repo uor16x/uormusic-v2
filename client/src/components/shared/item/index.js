@@ -8,6 +8,7 @@ import {Col, Row} from "react-bootstrap";
 export const Item = function ({
 								  clickAction,
 								  id,
+								  active,
 								  longPress,
 								  showActions = false,
 								  menuCalledCallback,
@@ -45,7 +46,13 @@ export const Item = function ({
 
 	return (
 		<div className="item-wrapper">
-			<div className="item" id={id} onClick={clickAction} onContextMenu={(e) => handleMenu(e)} {...bind}>
+			<div
+				className={`item ${active ? 'active' : ''}`}
+				id={id}
+				onClick={clickAction}
+				onContextMenu={(e) => handleMenu(e)}
+				{...bind}
+			>
 				{props.children}
 			</div>
 			{showActions && actions}
