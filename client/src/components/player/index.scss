@@ -10,10 +10,14 @@
   border-bottom-right-radius: $main-border-radius;
   border-bottom-left-radius: $main-border-radius;
 
-  .controls, .title, .utils, {
+  .controls, .timestamp, .title, .utils {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+  }
+
+  .timestamp {
+    align-items: center;
   }
 
   .control {

@@ -56,6 +56,12 @@
     .item {
       background-color: rgba(black, 0.1);
 
+      .item-inner-wrapper {
+        padding: 5px;
+        display: flex;
+        justify-content: center;
+      }
+
       .music-list-item-tools {
         visibility: hidden;
         display: flex;

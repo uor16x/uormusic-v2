@@ -44,8 +44,6 @@ export const Item = function ({
 		)
 		: []
 
-
-	console.log(actions)
 	return (
 		<div className="item-wrapper">
 			<div

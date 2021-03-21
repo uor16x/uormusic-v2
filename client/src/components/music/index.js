@@ -392,7 +392,7 @@ export class Music extends React.Component {
 					clickAction={() => clickAction(item._id)}
 					extraActions={extraActions}
 				>
-					<Col>
+					<Col className="item-inner-wrapper">
 						<span className="cut">{item.name}</span>
 					</Col>
 				</Item>

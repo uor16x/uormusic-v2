@@ -37,10 +37,11 @@ export class Player extends React.Component {
 	}
 
 	render() {
+
 		return (
 			<Slide top>
 				<div id="player">
-					<Col xs="4" sm="2" className="controls">
+					<Col xs="6" sm="2" className="controls">
 						<div className="control">
 							<FontAwesomeIcon
 								className="clickable"
@@ -74,14 +75,19 @@ export class Player extends React.Component {
 								icon="step-forward"/>
 						</div>
 					</Col>
-					<Col xs="4" sm="7" className="title">
+					<Col className="d-none d-sm-flex col-sm-3 col-md-2 col-lg-1 timestamp">
+						<div className="control">
+							00:00/00:00
+						</div>
+					</Col>
+					<Col className="d-none d-sm-flex col-sm-4 col-md-5 col-lg-6 title cut">
 						<div className="control">
 							<span className="cut">
 								{this.state.song && this.state.song.name}
 							</span>
 						</div>
 					</Col>
-					<Col xs="4" sm="3" className="utils">
+					<Col xs="6" sm="3" className="utils">
 						<div className="control">
 							<FontAwesomeIcon
 								className="clickable"
