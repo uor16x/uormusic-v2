@@ -16,8 +16,8 @@ export const PlaybackService = {
     subscribePlayback(fn) {
         this.playbackCallbacks.push(fn);
     },
-    playbackAction() {
-        this.playbackCallbacks.forEach(fn => fn());
+    playbackAction(cb) {
+        this.playbackCallbacks.forEach(fn => fn(cb));
     },
 
     nextSongCallbacks: [],
@@ -49,33 +49,43 @@ export const PlaybackService = {
         this.audio.src = this.song.url
     },
 
-    play() {
+    play(cb) {
         this.checkAudio()
         if (!this.playing) {
             this.audio.play();
             this.playing = true
         }
-        this.playbackAction()
+        this.playbackAction(cb)
     },
 
-    pause() {
+    pause(cb) {
         this.checkAudio()
         if (this.playing) {
             this.audio.pause();
             this.playing = false
         }
-        this.playbackAction()
+        this.playbackAction(cb)
     },
 
     next() {
         this.checkAudio()
         if (!this.playlist || !this.song) return
-        this.pause()
         const currentSongIndex = this.playlist.songs
             .findIndex(songId => songId === this.song._id)
         const newIndex = currentSongIndex === this.playlist.songs.length - 1
             ? 0
             : currentSongIndex + 1
+        this.nextSongPublish(this.playlist.songs[newIndex])
+    },
+
+    prev() {
+        this.checkAudio()
+        if (!this.playlist || !this.song) return
+        const currentSongIndex = this.playlist.songs
+            .findIndex(songId => songId === this.song._id)
+        const newIndex = currentSongIndex === 0
+            ? 0
+            : currentSongIndex - 1
         this.nextSongPublish(this.playlist.songs[newIndex])
     }
 }

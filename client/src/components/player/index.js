@@ -16,24 +16,30 @@ export class Player extends React.Component {
 		this.state = {
 			playing: PlaybackService.playing,
 			song: PlaybackService.song,
-			totalTime: null,
-			currentTime: null
+			time: null
 		}
 	}
 
 	componentDidMount() {
-		PlaybackService.subscribePlayback(() => {
+		PlaybackService.subscribePlayback((cb) => {
 			this.setState({
 				playing: PlaybackService.playing,
 				song: PlaybackService.song
+			}, () => {
+				if (cb) {
+					cb()
+				}
 			})
 		})
 		const audio = PlaybackService.audio
 		audio.ontimeupdate = () => {
-			this.setState({
-				currentTime: this.convertTime(audio.currentTime),
-				totalTime: this.convertTime(audio.duration)
-			})
+			const currentTime = this.convertTime(audio.currentTime),
+				totalTime =  this.convertTime(audio.duration)
+			if (currentTime && totalTime) {
+				this.setState({
+					time: `${currentTime} / ${totalTime}`
+				})
+			}
 		}
 	}
 
@@ -58,20 +64,23 @@ export class Player extends React.Component {
 		PlaybackService.next()
 	}
 
+	prev() {
+		PlaybackService.prev()
+	}
+
 	render() {
 		const titleText = (this.state.song && this.state.song.name) || ''
-		const title = PlaybackService.playing
+		const title = this.state.playing
 			? (
-				// eslint-disable-next-line
-				<marquee direction="left">
-					{titleText}
-				</marquee>
+				<Slide left>
+					{/*eslint-disable-next-line*/}
+					<marquee direction="left">
+						{titleText}
+					</marquee>
+				</Slide>
 			)
 			: <span className="cut">{titleText}</span>
 
-		const time = this.state.currentTime && this.state.totalTime
-			? `${this.state.currentTime} / ${this.state.totalTime}`
-			: null
 		return (
 			<Slide top>
 				<div id="player">
@@ -79,7 +88,7 @@ export class Player extends React.Component {
 						<div className="control">
 							<FontAwesomeIcon
 								className="clickable"
-								onClick={() => alert('')}
+								onClick={() => this.prev()}
 								icon="step-backward"/>
 						</div>
 						{
@@ -111,7 +120,7 @@ export class Player extends React.Component {
 					</Col>
 					<Col className="d-none d-sm-flex col-sm-3 col-md-2 timestamp">
 						<div className="control">
-							{time}
+							{this.state.time}
 						</div>
 					</Col>
 					<Col className="d-none d-sm-flex col-sm-4 col-md-5 title cut">
