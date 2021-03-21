@@ -1,6 +1,23 @@
 export const PlaybackService = {
     audio: null,
     playing: false,
+    song: null,
+
+    showPlayerCallbacks: [],
+    subscribeShowPlayer(fn) {
+        this.showPlayerCallbacks.push(fn);
+    },
+    showPlayer() {
+        this.showPlayerCallbacks.forEach(fn => fn());
+    },
+
+    playbackCallbacks: [],
+    subscribePlayback(fn) {
+        this.playbackCallbacks.push(fn);
+    },
+    playbackAction() {
+        this.playbackCallbacks.forEach(fn => fn());
+    },
 
     setAudio(audioRef) {
         this.audio = audioRef
@@ -12,9 +29,13 @@ export const PlaybackService = {
         }
     },
 
-    setSrc(src) {
+    setSong(song) {
         this.checkAudio()
-        this.audio.src = src
+        if (!this.song && song) {
+            this.showPlayer()
+        }
+        this.song = song
+        this.audio.src = this.song.url
     },
 
     play() {
@@ -23,6 +44,7 @@ export const PlaybackService = {
             this.audio.play();
             this.playing = true
         }
+        this.playbackAction()
     },
 
     pause() {
@@ -31,5 +53,6 @@ export const PlaybackService = {
             this.audio.pause();
             this.playing = false
         }
+        this.playbackAction()
     }
 }

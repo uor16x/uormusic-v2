@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import './index.scss'
 
 import {Auth, Player, Music, Search} from "components"
-import {UserService, ModalService, ToastService} from "services"
+import {UserService, ModalService, ToastService, PlaybackService} from "services"
 import {Footer} from "../footer"
 
 const spaceResolutions = {
@@ -22,7 +22,8 @@ const defaultState = {
     user: null,
     loading: true,
     searchMode: false,
-    modal: null
+    modal: null,
+    showPlayer: false
 }
 
 export class Full extends React.Component {
@@ -42,6 +43,8 @@ export class Full extends React.Component {
         ToastService.subscribeSuccess(text => toast(text, { type: toast.TYPE.SUCCESS }))
         ToastService.subscribeInfo(text => toast(text, { type: toast.TYPE.INFO }))
         ToastService.subscribeErr(text => toast(text, { type: toast.TYPE.ERROR }))
+
+        PlaybackService.subscribeShowPlayer(() => this.setState({ showPlayer: true }))
 
         this.getUser()
     }
@@ -105,8 +108,8 @@ export class Full extends React.Component {
         const result = this.state.user
                 ? (
                     <React.Fragment>
-                        <Player />
-                        <div id="workspace">
+                        { this.state.showPlayer && <Player />}
+                        <div id="workspace" style={({ top: PlaybackService.song ? '60px' : '0' })}>
                             <Music
                                 searchMode={this.state.searchMode}
                                 resolution={spaceResolutions.music}

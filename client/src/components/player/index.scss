@@ -3,10 +3,22 @@
 #player {
   position: absolute;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 60px;
   width: 100%;
   background-color: $main;
   border-bottom-right-radius: $main-border-radius;
   border-bottom-left-radius: $main-border-radius;
+
+  .controls, .title, .utils, {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .control {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+  }
 }

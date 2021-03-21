@@ -66,6 +66,10 @@ export class Music extends React.Component {
 		this.itemLongPressed = this.itemLongPressed.bind(this)
 	}
 
+	componentDidMount() {
+		PlaybackService.setAudio(document.getElementById('audio'))
+	}
+
 	/**
 	 * Playlists
 	 */
@@ -148,7 +152,7 @@ export class Music extends React.Component {
 			: this.state.currSongs
 		const song = list.find(listItem => listItem._id === songId)
 		PlaybackService.pause()
-		PlaybackService.setSrc(song.url)
+		PlaybackService.setSong(song)
 		PlaybackService.play()
 		this.setState({
 			playingSong: songId,
@@ -417,6 +421,7 @@ export class Music extends React.Component {
 
 		return (
 			<React.Fragment>
+				<audio id="audio" className="hidden-inputs"></audio>
 				<input type="file"
 					   name="music"
 					   className="hidden-inputs"
