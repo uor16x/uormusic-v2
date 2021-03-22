@@ -18,8 +18,10 @@
     "react-dom": "^17.0.1",
     "react-reveal": "^1.2.2",
     "react-scripts": "4.0.3",
+    "react-sortablejs": "^6.0.0",
     "react-toastify": "^7.0.3",
     "sass": "^1.32.8",
+    "sortablejs": "^1.13.0",
     "use-long-press": "^1.0.5",
     "web-vitals": "^1.1.0"
   },
