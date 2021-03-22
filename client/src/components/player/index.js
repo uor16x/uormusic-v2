@@ -5,9 +5,9 @@ import {Col} from "react-bootstrap"
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faStepBackward, faStepForward, faPlay, faPause, faUndo, faRandom, faDownload} from '@fortawesome/free-solid-svg-icons'
-import {PlaybackService} from "services";
-library.add(faStepBackward, faStepForward, faPlay, faPause, faUndo, faRandom, faDownload)
+import {faStepBackward, faStepForward, faPlay, faPause, faUndo, faRandom, faTasks} from '@fortawesome/free-solid-svg-icons'
+import {PlaybackService, UploadService} from "services";
+library.add(faStepBackward, faStepForward, faPlay, faPause, faUndo, faRandom, faTasks)
 
 export class Player extends React.Component {
 
@@ -16,7 +16,8 @@ export class Player extends React.Component {
 		this.state = {
 			playing: PlaybackService.playing,
 			song: PlaybackService.song,
-			time: null
+			time: null,
+			showQueue: false
 		}
 	}
 
@@ -123,12 +124,12 @@ export class Player extends React.Component {
 							{this.state.time}
 						</div>
 					</Col>
-					<Col className="d-none d-sm-flex col-sm-4 col-md-5 title cut">
+					<Col className="d-none d-sm-flex col-sm-5 col-md-6 title cut">
 						<div className="control" style={({ paddingBottom: '2px' })}>
 							{title}
 						</div>
 					</Col>
-					<Col xs="6" sm="3" className="utils">
+					<Col xs="6" sm="2" className="utils">
 						<div className="control">
 							<FontAwesomeIcon
 								className="clickable"
@@ -138,14 +139,8 @@ export class Player extends React.Component {
 						<div className="control">
 							<FontAwesomeIcon
 								className="clickable"
-								onClick={() => alert('')}
+								onClick={() => UploadService.add('test')}
 								icon="random"/>
-						</div>
-						<div className="control">
-							<FontAwesomeIcon
-								className="clickable"
-								onClick={() => alert('')}
-								icon="download"/>
 						</div>
 					</Col>
 				</div>

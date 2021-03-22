@@ -442,13 +442,6 @@ export class Music extends React.Component {
 		/**
 		 * Basic render setup
 		 */
-		const searchButton = (
-			<FontAwesomeIcon
-				onClick={this.toggleSearching}
-				className="tool-item clickable"
-				icon={ this.state.searching ? 'times' : 'search'}
-			/>)
-
 		const mobileUser = isMobile()
 		const modeVars = this.modeHandler()
 
@@ -476,7 +469,6 @@ export class Music extends React.Component {
 							{modeVars.title}
 						</Col>
 						<Col xs={2} className="tools">
-							{searchButton}
 							{modeVars.toolButton}
 						</Col>
 					</div>

@@ -24,11 +24,37 @@
   }
 
   .toolbar {
-    justify-content: center;
+    .queue-list {
+      min-width: 22px;
+    }
+  }
+
+  .now-playing {
+    .now-playing-text {
+      padding-top: 2px;
+
+      .music-icon {
+        font-size: 13px;
+      }
+
+      .text-wrapper {
+        margin-left: 8px;
+
+        .song-part:hover {
+          cursor: pointer;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  .toolbar {
+    justify-content: space-around;
 
     &-item {
       text-align: center;
       cursor: pointer;
+      font-size: 21px;
     }
   }
 }

@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import './index.scss'
 
 import {Auth, Player, Music, Search} from "components"
-import {UserService, ModalService, ToastService, PlaybackService} from "services"
+import {UserService, ModalService, ToastService, PlaybackService, UploadService} from "services"
 import {Footer} from "../footer"
 
 const spaceResolutions = {
