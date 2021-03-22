@@ -18,7 +18,7 @@ export class Footer extends React.Component {
 			song: PlaybackService.song,
 			playlist: PlaybackService.playlist,
 			showTooltip: false,
-			tooltipText: ''
+			tooltipText: '<b>Queue is empty!</b>'
 		}
 	}
 
@@ -27,17 +27,19 @@ export class Footer extends React.Component {
 			song: PlaybackService.song, playlist: PlaybackService.playlist
 		}))
 		UploadService.subscribe(() => {
-			const tooltip = UploadService.queue.reduce((acc, item) => {
-				acc += `
-					<div class="row tooltip-container">
-						<div class="col col-8 cut queue-name">${item.name}</div>
-						<div class="col col-4 cut queue-status">${item.status}</div>
-					</div>
-				`
-				return acc
-			}, '<div>')
+			const tooltip = UploadService.queue.length === 0
+				? '<b>Queue is empty!</b>'
+				: UploadService.queue.reduce((acc, item) => {
+					acc += `
+						<div class="row tooltip-container">
+							<div class="col col-8 cut queue-name">${item.name}</div>
+							<div class="col col-4 cut queue-status">${item.status}</div>
+						</div>
+					`
+					return acc
+				}, '<div>') + '</div>'
 			this.setState({
-				tooltipText: `${tooltip}</div>`
+				tooltipText: tooltip
 			})
 		})
 	}
@@ -80,7 +82,7 @@ export class Footer extends React.Component {
 				<Row className="footer-wrapper">
 					<Col
 						className="now-playing"
-						xs={9}
+						xs={8}
 						sm={10}
 					>
 						<span className="now-playing-text cut">
@@ -88,10 +90,10 @@ export class Footer extends React.Component {
 						</span>
 					</Col>
 					<Col className="toolbar"
-					     xs={3}
+					     xs={4}
 					     sm={2}
 					>
-						<div className="queue-list toolbar-item clickable" data-tip={this.state.tooltipText && this.state.tooltipText}>
+						<div className="queue-list toolbar-item clickable" data-tip={this.state.tooltipText}>
 							<FontAwesomeIcon
 								icon={queueIcon}/>
 						</div>
