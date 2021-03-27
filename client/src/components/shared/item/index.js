@@ -35,7 +35,7 @@ export const Item = function ({
 		)
 		: []
 
-	const mobileMenu = mobile
+	const mobileMenu = !mobile
 		? (
 			<div className="mobile-menu clickable" onClick={(event) => handleMenu(event)}>
 				<FontAwesomeIcon icon="bars"/>

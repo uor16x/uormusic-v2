@@ -79,6 +79,10 @@
         padding: 5px;
         display: flex;
         justify-content: center;
+
+        &.mobile {
+          max-width: 90%;
+        }
       }
 
       .music-list-item-tools {
