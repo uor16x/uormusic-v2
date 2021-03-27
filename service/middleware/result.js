@@ -15,7 +15,7 @@ module.exports = app => (req, res, next) => {
 				logLine += `# ${opt}: ${optStringified} `
 			}
 		})
-		app.logger.debug(logLine)
+		app.logger.info(logLine)
 		return data ? res.json(data) : res.end()
 	}
 	return next()

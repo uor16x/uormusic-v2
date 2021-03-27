@@ -2,7 +2,7 @@ import React, {useState} from "react"
 import { Modal, Button, InputGroup, FormControl } from "react-bootstrap";
 import { ModalService } from "services"
 
-export const CustomModal = function ({ header, inputFields = [], submitText, cb }) {
+export const CustomModal = function ({ header, children, inputFields = [], submitText, cb }) {
 
     function submit(data) {
         cb(data)
@@ -36,14 +36,14 @@ export const CustomModal = function ({ header, inputFields = [], submitText, cb 
                         </span>
                     </Modal.Title>
                 </Modal.Header>
-                {inputs.length > 0 &&
+                {children || inputs.length > 0 &&
                 <Modal.Body>
-                    {inputs}
+                    {children || inputs}
                 </Modal.Body>
                 }
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => ModalService.publish(null)}>Close</Button>
-                    <Button variant="primary" onClick={() => submit(data) }>{ submitText }</Button>
+                    {!children && <Button variant="primary" onClick={() => submit(data) }>{ submitText }</Button>}
                 </Modal.Footer>
             </Modal.Dialog>
         </React.Fragment>

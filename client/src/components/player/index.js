@@ -6,7 +6,7 @@ import {Col} from "react-bootstrap"
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {faStepBackward, faStepForward, faPlay, faPause, faUndo, faRandom, faTasks} from '@fortawesome/free-solid-svg-icons'
-import {PlaybackService, UploadService} from "services";
+import {PlaybackService} from "services";
 library.add(faStepBackward, faStepForward, faPlay, faPause, faUndo, faRandom, faTasks)
 
 export class Player extends React.Component {
@@ -139,7 +139,7 @@ export class Player extends React.Component {
 						<div className="control">
 							<FontAwesomeIcon
 								className="clickable"
-								onClick={() => UploadService.add('test')}
+								onClick={() => alert('test')}
 								icon="random"/>
 						</div>
 					</Col>

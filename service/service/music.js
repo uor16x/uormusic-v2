@@ -29,6 +29,9 @@ module.exports = app => {
 					return app.models.Song.create({
 						..._song,
 						_id: uuid.v4()
+					}).then(createdSong => {
+						createdSong.uploadId = data.uploadId
+						return createdSong
 					})
 				})
 			return bluebird.all(songs)

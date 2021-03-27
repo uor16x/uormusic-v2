@@ -1,7 +1,7 @@
 import './index.scss'
 import {useLongPress} from 'use-long-press'
 import {isMobile} from 'utils/helper'
-import React from "react";
+import React, {useEffect} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Col, Row} from "react-bootstrap";
 
@@ -10,11 +10,10 @@ export const Item = function ({
 								  id,
 								  active,
 								  longPress,
-								  menuCalledCallback,
+								  menuCalledCallback = () => {},
 								  extraActions=[],
 								  ...props
 }) {
-
 	function handleMenu(event) {
 		event.preventDefault()
 		menuCalledCallback()

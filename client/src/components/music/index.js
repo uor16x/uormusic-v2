@@ -1,8 +1,8 @@
 import React from 'react'
 import './index.scss'
-import { Col } from 'react-bootstrap'
+import {Col, Row} from 'react-bootstrap'
 import {CustomModal, Item} from 'components'
-import {MusicService, ModalService, ToastService, PlaybackService} from 'services'
+import {UserService, MusicService, ModalService, ToastService, PlaybackService, SocketService, QueueService} from 'services'
 import {isMobile} from 'utils/helper'
 
 import Slide from 'react-reveal/Slide';
@@ -43,14 +43,16 @@ const defaultState = {
 	searching: false,
 	searchQuery: '',
 	currPlaylist: null,
+	playlists: null,
 	currSongs: [],
 	playingSong: null,
 	playingPlaylist: null,
 	playingSongs: null,
 	menuActionItem: null,
 	listLoading: false,
-	showPlayer: false
-
+	showPlayer: false,
+	showQueue: false,
+	queue: []
 }
 
 export class Music extends React.Component {
@@ -58,7 +60,7 @@ export class Music extends React.Component {
 	constructor(props) {
 		super(props)
 		this.fileUploadRef = React.createRef()
-		this.state = { ...defaultState }
+		this.state = { ...defaultState, playlists: props.playlists }
 
 		this.setSearchQuery = this.setSearchQuery.bind(this)
 		this.deletePlaylistModal = this.deletePlaylistModal.bind(this)
@@ -69,12 +71,22 @@ export class Music extends React.Component {
 		this.itemLongPressed = this.itemLongPressed.bind(this)
 	}
 
+	componentDidUpdate(prevProps) {
+		if (JSON.stringify(prevProps.playlists) !== JSON.stringify(this.props.playlists)) {
+			this.setState({ playlists: this.props.playlists })
+		}
+	}
+
 	componentDidMount() {
 		PlaybackService.setAudio(document.getElementById('audio'))
 		PlaybackService.subscribeShowPlayer(() => this.setState({ showPlayer: true }))
 		PlaybackService.subscribeNextSong(id => {
 			this.setSong(id, true)
 		})
+		SocketService.connect(this.props.userId)
+		SocketService.addHandler('queue:update', data => QueueService.publish(data))
+		SocketService.addHandler('songs:update', () => this.updateOrGetSongs())
+		QueueService.subscribe(data => this.setState({ queue: data }))
 	}
 
 	/**
@@ -108,7 +120,7 @@ export class Music extends React.Component {
 	}
 
 	deletePlaylistModal(id) {
-		const name = (this.props.playlists.find(list => list._id === id)).name
+		const name = (this.state.playlists.find(list => list._id === id)).name
 		const modal = (
 			<CustomModal
 				key={"deletePlaylist"}
@@ -133,7 +145,7 @@ export class Music extends React.Component {
 				inputFields={[{
 					key: 'name',
 					placeholder: 'Playlist name',
-					value: this.props.playlists.find(list => list._id === id).name
+					value: this.state.playlists.find(list => list._id === id).name
 				}]}
 				cb={(data) => {
 					if (data.name) {
@@ -155,7 +167,7 @@ export class Music extends React.Component {
 	 */
 	setSong(songId, auto = false) {
 		const setSongWrapper = () => {
-			const playlist = this.props.playlists.find(listItem =>
+			const playlist = this.state.playlists.find(listItem =>
 				listItem._id === (auto ? this.state.playingPlaylist : this.state.currPlaylist))
 			const currentSongsList = auto ? this.state.playingSongs : this.state.currSongs
 			const song = currentSongsList.find(listSong => listSong._id === songId)
@@ -239,14 +251,16 @@ export class Music extends React.Component {
 				listLoading: true
 			})
 		}
-		return MusicService.getSongs(playlistId || this.state.currPlaylist)
-			.then(response => {
-				if (playlistId) {
-					return response.songs
-				} else {
-					this.setState({ currSongs: response.songs })
-				}
-			}, err => ToastService.publishErr('Error retrieving songs'))
+		if (playlistId || this.state.currPlaylist) {
+			return MusicService.getSongs(playlistId || this.state.currPlaylist)
+				.then(response => {
+					if (playlistId) {
+						return response.songs
+					} else {
+						this.setState({ currSongs: response.songs })
+					}
+				}, err => ToastService.publishErr('Error retrieving songs'))
+		}
 	}
 	selectFiles() {
 		this.fileUploadRef.current.click()
@@ -257,10 +271,9 @@ export class Music extends React.Component {
 		const playlistId = this.state.currPlaylist
 		MusicService.uploadFiles(playlistId, files)
 			.then(() => {
-				ToastService.publishSuccess('Upload from disk finished!')
-				if (this.state.currPlaylist === playlistId) {
+				/*if (this.state.currPlaylist === playlistId) {
 					this.updateOrGetSongs()
-				}
+				}*/
 			}).catch(err => {
 			console.error(err)
 		})
@@ -321,7 +334,8 @@ export class Music extends React.Component {
 			backButton: <React.Fragment/>,
 			listItems: [],
 			title: '',
-			toolButton: null
+			toolButton: null,
+			queue: null
 		}
 
 		let list = [],
@@ -329,6 +343,21 @@ export class Music extends React.Component {
 			deleteAction = stubFn,
 			clickAction = stubFn,
 			isActive = stubFn
+
+		if (this.state.queue.length) {
+			result.queue = (
+				<div className="queue">
+					{this.state.queue.map(item => {
+						return (
+							<Item key={item.name}>
+								<Col xs="8" className="cut" style={({ textAlign: 'left' })}>{item.name}</Col>
+								<Col xs="4" style={({ textAlign: 'right' })}>{item.status}</Col>
+							</Item>
+						)
+					})}
+				</div>
+			)
+		}
 
 		if (this.state.searching) {
 			result.title = (
@@ -342,7 +371,7 @@ export class Music extends React.Component {
 			)
 		} else {
 			const titleText = this.state.currPlaylist
-				? this.props.playlists.find(list => list._id === this.state.currPlaylist).name
+				? this.state.playlists.find(list => list._id === this.state.currPlaylist).name
 				: 'Home'
 			result.title = (
 				<span className="cut">
@@ -360,6 +389,7 @@ export class Music extends React.Component {
 			clickAction = (id) => this.setSong(id)
 			editAction = (id) => this.editSongModal(id)
 			deleteAction = (id) => this.deleteSongModal(id)
+
 			result.backButton = (
 				<FontAwesomeIcon
 					className="clickable"
@@ -372,7 +402,7 @@ export class Music extends React.Component {
 								 icon="upload"/>
 			)
 		} else {
-			list = this.props.playlists
+			list = this.state.playlists
 
 			if (this.state.listLoading) {
 				result.backButton = (
@@ -422,7 +452,7 @@ export class Music extends React.Component {
 	setSortedList(newList) {
 		let oldList = this.state.currPlaylist
 			? this.state.currSongs
-			: this.props.playlists
+			: this.state.playlists
 		if (!sameArrayOrder(newList, oldList)) {
 			if (this.state.currPlaylist) {
 				this.setState({
@@ -430,10 +460,16 @@ export class Music extends React.Component {
 					menuActionItem: null
 				})
 				MusicService.updatePlaylist(this.state.currPlaylist, { songs: newList.map(song => song._id) })
-					.then(() => this.props.triggerGetUser())
+					.then(() => this.updateOrGetSongs())
 					.catch(() => ToastService.publishErr('Failed to update item order'))
 			} else {
-				console.log('Update playlists')
+				this.setState({
+					playlists: newList,
+					menuActionItem: null
+				})
+				UserService.update(this.props.userId, { playlists: newList.map(item => item._id )})
+					.then(() => this.props.triggerGetUser())
+					.catch(() => ToastService.publishErr('Failed to update item order'))
 			}
 		}
 	}
@@ -477,7 +513,7 @@ export class Music extends React.Component {
 						&& modeVars.listItems
 						&& modeVars.listItems.length > 0
 						&& (
-							<div className="list">
+							<div className="list" style={({ height: this.state.queue.length ? '70%' : '100%' })}>
 								<ReactSortable
 									list={modeVars.list}
 									setList={(newList) => this.setSortedList(newList)}
@@ -485,6 +521,13 @@ export class Music extends React.Component {
 									{slideWrap(modeVars.listItems)}
 								</ReactSortable>
 							</div>
+						)
+					}
+					{
+						modeVars.queue && (
+							<Slide bottom>
+								{modeVars.queue}
+							</Slide>
 						)
 					}
 				</Col>

@@ -21,11 +21,15 @@ export const MusicService = {
     },
     async uploadFiles(playlistId, files) {
         const formData = new FormData();
+        const names = []
         for (let i = 0; i < files.length; i++) {
-            formData.append('songs', files[i])
+            const file = files[i]
+            formData.append('songs',file)
+            names.push(file.name)
         }
+        const namesQuery = encodeURIComponent(JSON.stringify(names))
         return api({
-            url: `${playlistServicePrefix}/upload/${playlistId}`,
+            url: `${playlistServicePrefix}/upload/${playlistId}?names=${namesQuery}`,
             method: 'POST',
             timeout: 300000,
             data: formData,

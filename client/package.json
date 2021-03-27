@@ -22,6 +22,7 @@
     "react-toastify": "^7.0.3",
     "react-tooltip": "^4.2.15",
     "sass": "^1.32.8",
+    "socket.io-client": "^4.0.0",
     "sortablejs": "^1.13.0",
     "use-long-press": "^1.0.5",
     "web-vitals": "^1.1.0"

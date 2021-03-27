@@ -18,5 +18,9 @@ export const UserService = {
 
     async authorize(username, password) {
         return api.post(`${servicePrefix}`, { username, password })
-    }
+    },
+
+    async update(id, body) {
+        return api.post(`${servicePrefix}/edit`, body)
+    },
 }

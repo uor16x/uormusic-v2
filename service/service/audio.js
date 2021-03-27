@@ -29,17 +29,7 @@ module.exports = app => {
 					.toFormat('mp3')
 					.outputOptions('-id3v2_version', '4')
 					.on('error', reject)
-					.pipe(gcsStream, { end:true })
-			})
-		},
-		metadata: src => {
-			return new Promise((resolve, reject) => {
-				app.ffmpeg.ffprobe(src, function (err, metadata) {
-					if (err) {
-						return reject(err)
-					}
-					return resolve(metadata)
-				})
+					.pipe(gcsStream, { end: true })
 			})
 		}
 	}

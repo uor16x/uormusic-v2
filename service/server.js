@@ -9,7 +9,8 @@ const express = require('express'),
 	uuid = require('uuid'),
 	lastfmapi = require('lastfmapi'),
 	{ Storage } = require('@google-cloud/storage'),
-	multerStorage = require('multer-google-storage')
+	multerStorage = require('multer-google-storage'),
+	http = require('http')
 
 process.on('uncaughtException', err => errHandler(err))
 
@@ -37,7 +38,6 @@ module.exports = env => {
 				'api_key': app.env.LFM_API_KEY,
 				'secret': app.env.LFM_SECRET
 			})
-			app.uploadQueue = {}
 
 			app.upload = multer({
 				storage: multer.memoryStorage()
@@ -77,7 +77,13 @@ module.exports = env => {
 			app.ffmpeg.setFfprobePath(ffprobePath)
 			process.env['FFMPEG_PATH'] = ffmpegPath
 			process.env['FFPROBE_PATH'] = ffprobePath
-			app.listen(app.env.PORT, err => {
+			const server = http.createServer(app)
+			app.queue = require('./config/queue')(app)
+			app.emit = require('./config/socket')(app)(require('socket.io')(server, {
+				cors: true,
+				origins: ['http://localhost*'],
+			}))
+			server.listen(app.env.PORT, err => {
 				if (err) {
 					return errHandler(err)
 				}

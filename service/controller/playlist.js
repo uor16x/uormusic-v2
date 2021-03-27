@@ -1,5 +1,6 @@
 const router = require('express').Router(),
-	bluebird = require('bluebird')
+	bluebird = require('bluebird'),
+	uuid = require('uuid')
 
 module.exports = app => {
 
@@ -65,37 +66,62 @@ module.exports = app => {
 		return res.result(null)
 	})
 
-	router.post('/upload/:playlistId', app.upload.any(), async (req, res) => {
-		const playlist = await app.models.Playlist.findOne({ _id: req.params.playlistId })
-		if (!playlist) {
-			return res.result('No such playlist')
-		}
-		const songs = req.files.map(file => {
-			return app.services.audio.increaseBitrateAndUpload(file)
-				.then(fileName => {
-					const fileRef = app.storage
-						.bucket('uormusicv2-songs')
-						.file(fileName)
-					return bluebird.props({
-						url: fileRef.getSignedUrl({ action: 'read', expires: '01-01-2030'}),
-						data: {
-							fileName,
-							originalname: file.originalname
+	router.post(
+		'/upload/:playlistId',
+		app.upload.any(),
+		async (req, res) => {
+			const playlist = await app.models.Playlist.findOne({ _id: req.params.playlistId })
+			if (!playlist) {
+				return res.result('No such playlist')
+			}
+			const userId = req.session.userId
+			const names = req.query.names && JSON.parse(req.query.names)
+			const fileUploadIds = app.queue.add(userId, names)
+			const songs = req.files.map(file => {
+				const id = fileUploadIds[file.originalname]
+				return app.services.audio.increaseBitrateAndUpload(file)
+					.then(fileName => {
+						app.queue.setStatus(userId, id, 'URL-generation')
+						const fileRef = app.storage
+							.bucket('uormusicv2-songs')
+							.file(fileName)
+						return bluebird.props({
+							url: fileRef.getSignedUrl({ action: 'read', expires: '01-01-2030'}),
+							data: {
+								fileName,
+								originalname: file.originalname
+							}
+						})
+					})
+					.then(fileData => {
+						app.queue.setStatus(userId, id, 'Storing')
+						return {
+							...fileData.data,
+							uploadId: id,
+							url: fileData.url[0]
 						}
 					})
+			})
+			res.result(null)
+			bluebird.all(songs)
+				.then(app.services.music.createSongs)
+				.then(createdSongs => {
+					app.queue.setStatus(userId, createdSongs.map(song => song.uploadId), 'Attaching')
+					return app.services.music.attachSongsToPlaylist(playlist, createdSongs)
+						.then(() => createdSongs)
 				})
-				.then(fileData => {
-					return {
-						...fileData.data,
-						url: fileData.url[0]
-					}
+				.then(createdSongs => {
+					app.queue.setStatus(userId, createdSongs.map(song => song.uploadId), 'Done')
+					app.emit(userId, 'songs:update', {})
+					setTimeout(() => {
+						app.queue.delete(userId, createdSongs.map(song => song.uploadId))
+					}, 3000)
+					app.logger.debug('Upload done')
 				})
-		})
-		bluebird.all(songs)
-			.then(app.services.music.createSongs)
-			.then(createdSongs => app.services.music.attachSongsToPlaylist(playlist, createdSongs))
-			.then(() => res.result(null))
-			.catch(err => res.result(err.message))
+				.catch(err => {
+					app.logger.error(err)
+					// TODO: set error for specific queue item
+				})
 	})
 
 	router.delete('/:id', async (req, res) => {

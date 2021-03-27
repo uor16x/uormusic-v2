@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import './index.scss'
 
 import {Auth, Player, Music, Search} from "components"
-import {UserService, ModalService, ToastService, PlaybackService, UploadService} from "services"
+import {UserService, ModalService, ToastService, PlaybackService} from "services"
 import {Footer} from "../footer"
 
 const spaceResolutions = {
@@ -111,6 +111,7 @@ export class Full extends React.Component {
                         { this.state.showPlayer && <Player />}
                         <div id="workspace" style={({ top: PlaybackService.song ? '60px' : '0' })}>
                             <Music
+                                userId={this.state.user._id}
                                 searchMode={this.state.searchMode}
                                 resolution={spaceResolutions.music}
                                 playlists={this.state.user.playlists}

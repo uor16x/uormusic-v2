@@ -47,5 +47,28 @@ module.exports = app => {
 		return res.result()
 	})
 
+	router.post('/edit', async (req, res) => {
+		let user
+		try {
+			user = await app.models.User.findOne({ _id: req.session.userId })
+		} catch (err) {
+			return res.result(`Error getting user: ${err.message}`)
+		}
+		if (!user) {
+			return res.result('No such user')
+		}
+		const { playlists } = req.body
+		if (playlists) {
+			user.playlists = playlists
+			user.markModified('playlists')
+		}
+		try {
+			await user.save()
+		} catch (err) {
+			return res.result(`Save error: ${err.message}`)
+		}
+		return res.result(null)
+	})
+
 	return router
 }
