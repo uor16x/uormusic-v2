@@ -47,16 +47,16 @@ export class Footer extends React.Component {
 				<Row className="footer-wrapper">
 					<Col
 						className="now-playing"
-						xs={9}
-						sm={10}
+						xs={10}
+						sm={11}
 					>
 						<span className="now-playing-text cut">
 							{nowPlaying}
 						</span>
 					</Col>
 					<Col className="toolbar"
-					     xs={3}
-					     sm={2}
+					     xs={2}
+					     sm={1}
 					>
 						<div className="toolbar-item">
 							<FontAwesomeIcon

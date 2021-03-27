@@ -1,7 +1,7 @@
 import './index.scss'
 import {useLongPress} from 'use-long-press'
 import {isMobile} from 'utils/helper'
-import React, {useEffect} from "react";
+import React from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {Col, Row} from "react-bootstrap";
 
@@ -16,18 +16,10 @@ export const Item = function ({
 }) {
 	function handleMenu(event) {
 		event.preventDefault()
+		event.stopPropagation()
 		menuCalledCallback()
 	}
 	const mobile = isMobile()
-	if (!mobile || !longPress) {
-		longPress = () => {
-			menuCalledCallback()
-		}
-	}
-
-	const bind = useLongPress(element => mobile ? longPress(element.target.closest('.item')) : (() => {}), {
-		captureEvent: true
-	})
 
 	const actions = extraActions && extraActions.length > 0
 		? (
@@ -43,16 +35,24 @@ export const Item = function ({
 		)
 		: []
 
+	const mobileMenu = mobile
+		? (
+			<div className="mobile-menu clickable" onClick={(event) => handleMenu(event)}>
+				<FontAwesomeIcon icon="bars"/>
+			</div>
+		)
+		: null
+
 	return (
 		<div className="item-wrapper">
 			<div
 				className={`item ${active ? 'active' : ''}`}
 				id={id}
 				onClick={clickAction}
-				onContextMenu={(e) => handleMenu(e)}
-				{...bind}
+				onContextMenu={(e) => !mobile && handleMenu(e)}
 			>
 				{props.children}
+				{mobileMenu}
 			</div>
 			{actions}
 		</div>

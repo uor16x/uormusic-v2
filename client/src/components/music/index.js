@@ -11,8 +11,8 @@ import { ReactSortable } from 'react-sortablejs'
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {fab} from '@fortawesome/free-brands-svg-icons'
-import {faSearch, faChevronLeft, faPlus, faTimes, faTrashAlt, faEdit, faUpload, faSpinner} from '@fortawesome/free-solid-svg-icons'
-library.add(fab, faSearch, faPlus, faChevronLeft, faTimes, faTrashAlt, faEdit, faUpload, faSpinner)
+import {faSearch, faChevronLeft, faPlus, faTimes, faTrashAlt, faEdit, faUpload, faSpinner, faBars} from '@fortawesome/free-solid-svg-icons'
+library.add(fab, faSearch, faPlus, faChevronLeft, faTimes, faTrashAlt, faEdit, faUpload, faSpinner, faBars)
 
 const stubFn = () => {}
 
@@ -514,12 +514,18 @@ export class Music extends React.Component {
 						&& modeVars.listItems.length > 0
 						&& (
 							<div className="list" style={({ height: this.state.queue.length ? '70%' : '100%' })}>
-								<ReactSortable
-									list={modeVars.list}
-									setList={(newList) => this.setSortedList(newList)}
-								>
-									{slideWrap(modeVars.listItems)}
-								</ReactSortable>
+								{
+									mobileUser
+										? slideWrap(modeVars.listItems)
+										: (
+											<ReactSortable
+												list={modeVars.list}
+												setList={(newList) => this.setSortedList(newList)}
+											>
+												{slideWrap(modeVars.listItems)}
+											</ReactSortable>
+										)
+								}
 							</div>
 						)
 					}
